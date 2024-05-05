@@ -92,7 +92,7 @@ end
 ---@param bufnr number
 ---@param client vim.lsp.client
 M.setup = function(bufnr, client)
-  if vim.tbl_contains({ "yamlls", "helm_ls" }, client.name) then
+  if not vim.tbl_contains({ "yamlls", "helm_ls" }, client.name) then
     return
   end
 
