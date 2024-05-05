@@ -161,7 +161,7 @@ M.schema = function(bufnr, new_schema)
     local override = {}
     override[new_schema.uri] = bufuri
 
-    log.fmt_debug("lsp=%s file=%s schema=%s set new override", client.name, bufuri, new_schema.uri)
+    log.fmt_debug("file=%s schema=%s set new override", bufuri, new_schema.uri)
 
     settings = vim.tbl_deep_extend("force", settings, { yaml = { schemas = override } })
     client.config.settings =
