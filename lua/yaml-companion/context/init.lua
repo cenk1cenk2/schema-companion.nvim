@@ -143,9 +143,18 @@ M.schema = function(bufnr, new_schema)
     local settings = client.config.settings
 
     -- we don't want more than 1 schema per file
-    for key, _ in pairs(settings.yaml.schemas) do
-      if settings.yaml.schemas[key] == bufuri then
-        settings.yaml.schemas[key] = nil
+    if client.name == "helm_ls" then
+      for key, _ in pairs(settings["helm-ls"].yamlls.config.schemas) do
+        if settings["helm-ls"].yamlls.config.schemas[key] == bufuri then
+          settings["helm-ls"].yamlls.config.schemas[key] = nil
+        end
+      end
+    -- try to parse this as yaml compatible language server
+    else
+      for key, _ in pairs(settings.yaml.schemas) do
+        if settings.yaml.schemas[key] == bufuri then
+          settings.yaml.schemas[key] = nil
+        end
       end
     end
 
