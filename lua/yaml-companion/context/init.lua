@@ -92,7 +92,7 @@ end
 ---@param bufnr number
 ---@param client vim.lsp.client
 M.setup = function(bufnr, client)
-  if client.name ~= "yamlls" then
+  if vim.tbl_contains({ "yamlls", "helm_ls" }, client.name) then
     return
   end
 
@@ -101,16 +101,6 @@ M.setup = function(bufnr, client)
   if require("yaml-companion.config").options.formatting then
     client.server_capabilities.documentFormattingProvider = true
     client.server_capabilities.documentRangeFormattingProvider = true
-  end
-
-  -- remove yamlls from not yaml files
-  -- https://github.com/towolf/vim-helm/issues/15
-  if vim.bo[bufnr].buftype ~= "" or vim.bo[bufnr].filetype == "helm" then
-    vim.diagnostic.disable(bufnr)
-    vim.defer_fn(function()
-      vim.diagnostic.reset(nil, bufnr)
-    end, 1000)
-    vim.lsp.buf_detach_client(bufnr, client.id)
   end
 
   local state = {
