@@ -163,7 +163,16 @@ M.schema = function(bufnr, new_schema)
 
     log.fmt_debug("lsp=%s file=%s schema=%s set new override", client.name, bufuri, new_schema.uri)
 
-    settings = vim.tbl_deep_extend("force", settings, { yaml = { schemas = override } })
+    if client.name == "helm_ls" then
+      settings = vim.tbl_deep_extend(
+        "force",
+        settings,
+        { ["helm-ls"] = { yamlls = { config = { schemas = override } } } }
+      )
+    else
+      settings = vim.tbl_deep_extend("force", settings, { yaml = { schemas = override } })
+    end
+
     client.config.settings =
       vim.tbl_deep_extend("force", settings, { yaml = { schemas = override } })
     client.workspace_did_change_configuration(client.config.settings)
