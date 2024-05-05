@@ -96,7 +96,7 @@ end
 ---@param bufnr number
 M.current = function(bufnr)
   local schema = lsp.get_jsonschema(bufnr)
-  if not schema or not schema.result[1] then
+  if not schema or not schema.result or not schema.result[1] then
     return default_schema
   end
   return schema.result[1]
