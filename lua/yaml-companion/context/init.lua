@@ -140,7 +140,7 @@ M.schema = function(bufnr, new_schema)
 
     local bufuri = vim.uri_from_bufnr(bufnr)
     local client = M.ctxs[bufnr].client
-    local settings = client.config.settings
+    local settings = client.settings
 
     -- we don't want more than 1 schema per file
     if client.name == "helm_ls" then
@@ -173,9 +173,9 @@ M.schema = function(bufnr, new_schema)
       settings = vim.tbl_deep_extend("force", settings, { yaml = { schemas = override } })
     end
 
-    client.config.settings =
-      vim.tbl_deep_extend("force", settings, { yaml = { schemas = override } })
-    client.workspace_did_change_configuration(client.config.settings)
+    settings = vim.tbl_deep_extend("force", settings, { yaml = { schemas = override } })
+    client.settings = vim.tbl_deep_extend("force", settings, { yaml = { schemas = override } })
+    client.workspace_did_change_configuration(client.settings)
   end
 
   return M.ctxs[bufnr].schema
