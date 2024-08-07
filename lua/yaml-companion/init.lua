@@ -9,8 +9,14 @@ M.setup = function(opts)
   config.setup(opts, function(client, bufnr)
     require("yaml-companion.context").setup(bufnr, client)
   end)
-  M.ctx = require("yaml-companion.context")
   require("yaml-companion.log").new({ level = config.options.log_level }, true)
+
+  M.ctx = require("yaml-companion.context")
+
+  if config.options.versions.kubernetes then
+    M.set_kubernetes_version(config.options.versions.kubernetes)
+  end
+
   return config.options.lspconfig
 end
 
