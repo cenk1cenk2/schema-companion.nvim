@@ -90,16 +90,11 @@ function M.match(bufnr)
     end
 
     return {
-      name = ("Kubernetes [%s] [%s@%s]"):format(
-        M.config.version,
-        resource.kind,
-        resource.group,
-        resource.version
-      ),
+      name = ("Kubernetes [%s] [%s@%s]"):format(M.config.version, resource.kind, resource.group),
       uri = ("https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/%s-standalone-strict/%s-%s.json"):format(
         M.config.version,
         resource.kind:lower(),
-        resource.version:lower()
+        resource.group:lower()
       ),
     }
   end
