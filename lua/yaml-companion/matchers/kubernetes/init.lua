@@ -73,7 +73,7 @@ function M.match(bufnr)
 
   if not resource.version then
     return {
-      name = ("Kubernetes [%s]"):format(M.config.version),
+      name = ("Kubernetes [%s] [%s@%s]"):format(M.config.version, resource.kind, resource.group),
       uri = ("https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/%s-standalone-strict/%s-%s.json"):format(
         M.config.version,
         resource.kind:lower(),
@@ -83,7 +83,7 @@ function M.match(bufnr)
   end
 
   return {
-    name = "Kubernetes [CRD]",
+    name = ("Kubernetes [CRD] [%s@%s/%s]"):format(resource.kind, resource.group, resource.version),
     uri = ("https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/%s/%s_%s.json"):format(
       resource.group:lower(),
       resource.kind:lower(),
