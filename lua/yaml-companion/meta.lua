@@ -29,6 +29,9 @@
 ---@field matchers Matcher[]
 
 ---@class Logger
+---@field trace fun(fmt: string, ...: any)
 ---@field debug fun(fmt: string, ...: any)
+---@field info fun(fmt: string, ...: any)
+---@field warn fun(fmt: string, ...: any)
 ---@field error fun(fmt: string, ...: any)
----@field warn fun(message: string)
+---@field fatal fun(fmt: string, ...: any)

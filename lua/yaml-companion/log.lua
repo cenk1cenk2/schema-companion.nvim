@@ -21,18 +21,11 @@ local defaults = {
   float_precision = 0.01,
 }
 
----@type Logger
+---@class Logger
 local M = {}
 
-function M.new(config, standalone)
+function M.new(config)
   config = vim.tbl_deep_extend("force", defaults, config)
-
-  local obj
-  if standalone then
-    obj = M
-  else
-    obj = {}
-  end
 
   local levels = {}
   for i, v in ipairs(config.modes) do
@@ -70,12 +63,13 @@ function M.new(config, standalone)
     end
   end
 
-  for i, x in pairs(config.modes) do
-    obj[x.name] = function(...)
-      return log_at_level(i, x, function(...)
+  for i, mode in pairs(config.modes) do
+    M[mode.name] = function(...)
+      return log_at_level(i, mode, function(...)
         local passed = { ... }
         local fmt = table.remove(passed, 1)
         local inspected = {}
+
         for _, v in ipairs(passed) do
           table.insert(inspected, vim.inspect(v))
         end

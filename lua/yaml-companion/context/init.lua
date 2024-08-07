@@ -40,7 +40,7 @@ function M.autodiscover(bufnr, client)
       "bufnr=%d client_id=%d schema=%s an SchemaStore defined schema matched this file",
       bufnr,
       client.id,
-      schema.name
+      current_schema.name or current_schema.uri
     )
     return M.ctxs[bufnr].schema
 
@@ -90,7 +90,7 @@ end
 function M.setup(bufnr, client)
   -- The server does support formatting but it is disabled by default
   -- https://github.com/redhat-developer/yaml-language-server/issues/486
-  if require("yaml-companion.config").config.formatting then
+  if require("yaml-companion").config.formatting then
     client.server_capabilities.documentFormattingProvider = true
     client.server_capabilities.documentRangeFormattingProvider = true
   end

@@ -1,6 +1,6 @@
 local M = {}
 
-local config = require("yaml-companion.config").config
+local config = require("yaml-companion").config
 local matchers = require("yaml-companion.matchers")
 local lsp = require("yaml-companion.lsp.requests")
 
@@ -51,6 +51,7 @@ function M.from_store()
   if schemas == nil or vim.tbl_count(schemas or {}) == 0 then
     return {}
   end
+
   return schemas
 end
 
@@ -59,8 +60,9 @@ function M.all()
   local r = {}
 
   r = vim.tbl_extend("keep", r, M.from_store())
-  r = vim.tbl_extend("keep", r, M.from_options())
   r = vim.tbl_extend("keep", r, M.from_matchers())
+  r = vim.tbl_extend("keep", r, M.from_options())
+
   return r
 end
 
@@ -68,6 +70,7 @@ end
 ---@param bufnr number
 function M.current(bufnr)
   local schema = lsp.get_jsonschema(bufnr)
+
   if not schema then
     return M.default_schema()
   end
