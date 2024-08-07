@@ -40,7 +40,7 @@ function M.setup_client(config)
     end),
 
     handlers = vim.tbl_extend("force", config.handlers or {}, {
-      ["yaml/schema/store/initialized"] = require("yaml-companion.lsp.handler").store_initialized,
+      ["yaml/schema/store/initialized"] = require("yaml-companion.lsp").store_initialized,
     }),
   })
 end

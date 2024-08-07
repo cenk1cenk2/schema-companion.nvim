@@ -1,6 +1,5 @@
 local M = {}
 
---local lsp = require("yaml-companion.lsp.requests")
 local matchers = require("yaml-companion.matchers")
 local schema = require("yaml-companion.schema")
 
