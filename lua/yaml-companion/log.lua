@@ -4,7 +4,7 @@
 -- This library is free software; you can redistribute it and/or modify it
 -- under the terms of the MIT license. See LICENSE for details.
 
-local default_config = {
+local defaults = {
   plugin = "yaml.nvim",
   use_console = true,
   highlights = true,
@@ -22,14 +22,14 @@ local default_config = {
 }
 
 ---@type Logger
-local log = {}
+local M = {}
 
-log.new = function(config, standalone)
-  config = vim.tbl_deep_extend("force", default_config, config)
+function M.new(config, standalone)
+  config = vim.tbl_deep_extend("force", defaults, config)
 
   local obj
   if standalone then
-    obj = log
+    obj = M
   else
     obj = {}
   end
@@ -37,30 +37,6 @@ log.new = function(config, standalone)
   local levels = {}
   for i, v in ipairs(config.modes) do
     levels[v.name] = i
-  end
-
-  local round = function(x, increment)
-    increment = increment or 1
-    x = x / increment
-    return (x > 0 and math.floor(x + 0.5) or math.ceil(x - 0.5)) * increment
-  end
-
-  local make_string = function(...)
-    local t = {}
-    for i = 1, select("#", ...) do
-      local x = select(i, ...)
-
-      if type(x) == "number" and config.float_precision then
-        x = tostring(round(x, config.float_precision))
-      elseif type(x) == "table" then
-        x = vim.inspect(x)
-      else
-        x = tostring(x)
-      end
-
-      t[#t + 1] = x
-    end
-    return table.concat(t, " ")
   end
 
   local log_at_level = function(level, level_config, message_maker, ...)
@@ -94,12 +70,8 @@ log.new = function(config, standalone)
     end
   end
 
-  for i, x in ipairs(config.modes) do
+  for i, x in pairs(config.modes) do
     obj[x.name] = function(...)
-      return log_at_level(i, x, make_string, ...)
-    end
-
-    obj[("fmt_%s"):format(x.name)] = function(...)
       return log_at_level(i, x, function(...)
         local passed = { ... }
         local fmt = table.remove(passed, 1)
@@ -107,12 +79,13 @@ log.new = function(config, standalone)
         for _, v in ipairs(passed) do
           table.insert(inspected, vim.inspect(v))
         end
+
         return string.format(fmt, unpack(inspected))
       end, ...)
     end
   end
 
-  return log
+  return M
 end
 
-return log
+return M

@@ -16,7 +16,7 @@ local select_schema = function(schema)
   require("yaml-companion.context").schema(0, selected_schema)
 end
 
-M.open_ui_select = function()
+function M.open_ui_select()
   local schemas = require("yaml-companion.schema").all()
 
   -- Don't open selection if there are no available schemas

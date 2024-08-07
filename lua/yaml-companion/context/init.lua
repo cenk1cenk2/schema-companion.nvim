@@ -1,7 +1,7 @@
 local M = {}
 
 --local lsp = require("yaml-companion.lsp.requests")
-local matchers = require("yaml-companion._matchers")._loaded
+local matchers = require("yaml-companion.matchers")
 local schema = require("yaml-companion.schema")
 
 local log = require("yaml-companion.log")
@@ -13,19 +13,19 @@ M.initialized_client_ids = {}
 ---@param bufnr number
 ---@param client vim.lsp.client
 ---@return SchemaResult | nil
-M.autodiscover = function(bufnr, client)
+function M.autodiscover(bufnr, client)
   if not M.ctxs[bufnr] then
-    log.fmt_error("bufnr=%d client_id=%d doesn't exists", bufnr, client.id)
+    log.error("bufnr=%d client_id=%d doesn't exists", bufnr, client.id)
     return
   end
 
   if not M.initialized_client_ids[client.id] then
-    log.fmt_debug("bufnr=%d client_id=%d is not yet initialized", bufnr, client.id)
+    log.debug("bufnr=%d client_id=%d is not yet initialized", bufnr, client.id)
     return
   end
 
   if M.ctxs[bufnr].executed then
-    log.fmt_debug("bufnr=%d client_id=%d already executed", bufnr, client.id)
+    log.debug("bufnr=%d client_id=%d already executed", bufnr, client.id)
     return M.ctxs[bufnr].schema
   end
 
@@ -34,9 +34,9 @@ M.autodiscover = function(bufnr, client)
 
   -- if LSP returns a name that means it came from SchemaStore
   -- and we can use it right away
-  if current_schema.name and current_schema.uri ~= schema.default().uri then
+  if current_schema.name and current_schema.uri ~= schema.default_schema().uri then
     M.ctxs[bufnr].schema = current_schema
-    log.fmt_debug(
+    log.debug(
       "bufnr=%d client_id=%d schema=%s an SchemaStore defined schema matched this file",
       bufnr,
       client.id,
@@ -50,7 +50,7 @@ M.autodiscover = function(bufnr, client)
     for _, option_schema in ipairs(schema.from_options()) do
       if option_schema.uri == current_schema.uri then
         M.ctxs[bufnr].schema = option_schema
-        log.fmt_debug(
+        log.debug(
           "bufnr=%d client_id=%d schema=%s an user defined schema matched this file",
           bufnr,
           client.id,
@@ -59,19 +59,15 @@ M.autodiscover = function(bufnr, client)
         return M.ctxs[bufnr].schema
       end
     end
-    log.fmt_debug(
-      "bufnr=%d client_id=%d no user defined schema matched this file",
-      bufnr,
-      client.id
-    )
+    log.debug("bufnr=%d client_id=%d no user defined schema matched this file", bufnr, client.id)
   end
 
   -- if LSP is not using any schema, use registered matchers
-  for _, matcher in pairs(matchers) do
+  for _, matcher in ipairs(matchers.get()) do
     local result = matcher.match(bufnr)
     if result then
-      M.schema(bufnr, { name = result.name, uri = result.uri })
-      log.fmt_debug(
+      M.schema(bufnr, result)
+      log.debug(
         "bufnr=%d client_id=%d schema=%s a registered matcher matched this file",
         bufnr,
         client.id,
@@ -80,42 +76,28 @@ M.autodiscover = function(bufnr, client)
       return M.ctxs[bufnr].schema
     end
 
-    log.fmt_debug("bufnr=%d client_id=%d no registered matcher matched this file", bufnr, client.id)
+    log.debug("bufnr=%d client_id=%d no registered matcher matched this file", bufnr, client.id)
   end
 
   -- No schema matched
-  log.fmt_debug("bufnr=%d client_id=%d no registered schema matches", bufnr, client.id)
+  log.debug("bufnr=%d client_id=%d no registered schema matches", bufnr, client.id)
 
   return {}
 end
 
 ---@param bufnr number
 ---@param client vim.lsp.client
-M.setup = function(bufnr, client)
-  if client.name ~= "yamlls" then
-    return
-  end
-
+function M.setup(bufnr, client)
   -- The server does support formatting but it is disabled by default
   -- https://github.com/redhat-developer/yaml-language-server/issues/486
-  if require("yaml-companion.config").options.formatting then
+  if require("yaml-companion.config").config.formatting then
     client.server_capabilities.documentFormattingProvider = true
     client.server_capabilities.documentRangeFormattingProvider = true
   end
 
-  -- remove yamlls from not yaml files
-  -- https://github.com/towolf/vim-helm/issues/15
-  if vim.bo[bufnr].buftype ~= "" or vim.bo[bufnr].filetype == "helm" then
-    vim.diagnostic.disable(bufnr)
-    vim.defer_fn(function()
-      vim.diagnostic.reset(nil, bufnr)
-    end, 1000)
-    vim.lsp.buf_detach_client(bufnr, client.id)
-  end
-
   local state = {
     client = client,
-    schema = schema.default(),
+    schema = schema.default_schema(),
     executed = false,
   }
 
@@ -128,41 +110,35 @@ end
 
 --- gets or sets the schema in its context and lsp
 ---@param bufnr number
----@param new_schema Schema | SchemaResult | nil
+---@param data Schema | SchemaResult | nil
 ---@return Schema
-M.schema = function(bufnr, new_schema)
+function M.schema(bufnr, data)
   if bufnr == 0 then
     bufnr = vim.api.nvim_get_current_buf()
   end
 
   if M.ctxs[bufnr] == nil then
-    return schema.default()
+    return schema.default_schema()
   end
 
-  -- TODO: Just here because set_buf_schema also accepts a SchemaResult
-  -- remove once set_buf_schema is only accepts Schema
-  if new_schema and new_schema.result and new_schema.result[1] then
-    new_schema = new_schema.result[1]
-  end
-
-  if new_schema and new_schema.uri and new_schema.name then
-    M.ctxs[bufnr].schema = new_schema
+  if data and data.uri and data.name then
+    M.ctxs[bufnr].schema = data
 
     local bufuri = vim.uri_from_bufnr(bufnr)
     local client = M.ctxs[bufnr].client
     local settings = client.settings
 
     -- we don't want more than 1 schema per file
-    for key, _ in pairs(settings.yaml.schemas) do
+    for key, _ in ipairs(settings.yaml.schemas) do
       if settings.yaml.schemas[key] == bufuri then
         settings.yaml.schemas[key] = nil
       end
     end
 
     local override = {}
-    override[new_schema.uri] = bufuri
+    override[data.uri] = bufuri
 
-    log.fmt_debug("file=%s schema=%s set new override", bufuri, new_schema.uri)
+    log.debug("file=%s schema=%s set new override", bufuri, data.uri)
 
     settings = vim.tbl_deep_extend("force", settings, { yaml = { schemas = override } })
     client.settings = vim.tbl_deep_extend("force", settings, { yaml = { schemas = override } })

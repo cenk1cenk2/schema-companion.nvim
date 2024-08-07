@@ -1,13 +1,8 @@
 local M = {}
 
-local options = require("yaml-companion.config").options
-local matchers = require("yaml-companion._matchers")._loaded
+local config = require("yaml-companion.config").config
+local matchers = require("yaml-companion.matchers")
 local lsp = require("yaml-companion.lsp.requests")
-
-local log = require("yaml-companion.log")
-
----@type Schema
-local default_schema = { name = "none", uri = "none" }
 
 ---@param schema Schema
 ---@return boolean
@@ -18,57 +13,32 @@ local valid_schema = function(schema)
   return false
 end
 
----@return Schema[]
-local options_legacy = function()
-  ---@type Schema[]
-  local r = {}
-  if options and options.schemas and options.schemas.result then
-    for _, schema in ipairs(options.schemas.result) do
-      if valid_schema(schema) then
-        table.insert(r, schema)
-      end
-    end
-  end
-  return r
-end
-
----@return Schema[]
-local options_new = function()
-  local r = {}
-  if options and options.schemas and not options.schemas.result then
-    for _, schema in ipairs(options.schemas) do
-      if valid_schema(schema) then
-        table.insert(r, schema)
-      end
-    end
-  end
-  return r
-end
-
 ---@return Schema
-M.default = function()
-  return default_schema
+function M.default_schema()
+  return { name = "none", uri = "none" }
 end
 
 --- User defined schemas
 ---@return Schema[]
-M.from_options = function()
-  local r = options_legacy()
-  if #r > 0 then
-    log.warn(
-      "Using deprecated schemas config ( '{ result = { {}, {} } }' ), please update your config and specify custom schemas as an array"
-    )
+function M.from_options()
+  local r = {}
+  if config and config.schemas then
+    for _, schema in ipairs(config.schemas) do
+      if valid_schema(schema) then
+        table.insert(r, schema)
+      end
+    end
   end
-  r = vim.tbl_extend("keep", r, options_new())
+
   return r
 end
 
 --- Matcher defined schemas
 ---@return Schema[]
-M.from_matchers = function()
+function M.from_matchers()
   ---@type Schema[]
   local r = {}
-  for _, matcher in pairs(matchers) do
+  for _, matcher in ipairs(matchers.get()) do
     r = vim.tbl_extend("keep", r, matcher.handles())
   end
   return r
@@ -76,16 +46,16 @@ end
 
 --- Matcher defined schemas
 ---@return Schema[]
-M.from_store = function()
+function M.from_store()
   local schemas = lsp.get_all_jsonschemas(0)
-  if schemas == nil or vim.tbl_count(schemas.result or {}) == 0 then
+  if schemas == nil or vim.tbl_count(schemas or {}) == 0 then
     return {}
   end
-  return schemas.result
+  return schemas
 end
 
 ---@return Schema[]
-M.all = function()
+function M.all()
   local r = M.from_options()
   r = vim.tbl_extend("keep", r, M.from_matchers())
   r = vim.tbl_extend("keep", r, M.from_store())
@@ -94,12 +64,13 @@ end
 
 ---@return Schema
 ---@param bufnr number
-M.current = function(bufnr)
+function M.current(bufnr)
   local schema = lsp.get_jsonschema(bufnr)
-  if not schema or not schema.result or not schema.result[1] then
-    return default_schema
+  if not schema then
+    return M.default_schema()
   end
-  return schema.result[1]
+
+  return schema
 end
 
 return M

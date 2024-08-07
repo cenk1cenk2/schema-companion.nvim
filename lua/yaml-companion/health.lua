@@ -21,7 +21,7 @@ local function lualib_installed(lib_name)
   return res
 end
 
-M.check = function()
+function M.check()
   for _, binary in ipairs(binaries) do
     if not binary_installed(binary.bin) then
       local bin_not_installed = binary.bin .. " not found"
@@ -49,9 +49,8 @@ M.check = function()
     end
   end
 
-  local matchers = require("yaml-companion._matchers")._loaded
-  for name, matcher in pairs(matchers) do
-    health.start(string.format("Matcher: `%s`", name))
+  for _, matcher in ipairs(require("yaml-companion.matchers").get()) do
+    health.start(string.format("Matcher: %s", matcher.name))
     matcher.health()
   end
 end

@@ -18,16 +18,17 @@
 ---@field match fun(bufnr: number): Schema | nil
 ---@field handles fun(): Schema[]
 ---@field health fun()
+---@field name string
+---@field config? table
+---@field setup? fun(table): Matcher
 
 ---@class ConfigOptions
 ---@field log_level "debug" | "trace" | "info" | "warn" | "error" | "fatal"
 ---@field formatting boolean
 ---@field schemas Schema[] | SchemaResult
----@field lspconfig table
----@field builtin_matchers table
----@field matcher_parameters table
+---@field matchers Matcher[]
 
 ---@class Logger
----@field fmt_debug fun(fmt: string, ...: any)
----@field fmt_error fun(fmt: string, ...: any)
+---@field debug fun(fmt: string, ...: any)
+---@field error fun(fmt: string, ...: any)
 ---@field warn fun(message: string)

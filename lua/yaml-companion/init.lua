@@ -1,51 +1,46 @@
 local M = {}
 
-local _matchers = require("yaml-companion._matchers")
+function M.setup(opts)
+  require("yaml-companion.config").setup(opts)
+end
 
-M.ctx = {}
+function M.setup_client(config)
+  local handlers = require("vim.lsp.handlers")
+  local add_hook_after = require("lspconfig.util").add_hook_after
 
-M.setup = function(opts)
-  local config = require("yaml-companion.config")
-  config.setup(opts, function(client, bufnr)
-    require("yaml-companion.context").setup(bufnr, client)
-  end)
-  require("yaml-companion.log").new({ level = config.options.log_level }, true)
+  handlers["yaml/schema/store/initialized"] =
+    require("yaml-companion.lsp.handler").store_initialized
 
-  M.ctx = require("yaml-companion.context")
+  return vim.tbl_deep_extend("force", {}, config, {
+    on_attach = add_hook_after(config.on_attach, function(client, bufnr)
+      require("yaml-companion.context").setup(bufnr, client)
+    end),
 
-  return config.options.lspconfig
+    on_init = add_hook_after(config.on_init, function(client)
+      client.notify("yaml/supportSchemaSelection", { {} })
+      return true
+    end),
+
+    handlers = handlers,
+  })
 end
 
 --- Set the schema used for a buffer.
 ---@param bufnr number: Buffer number
 ---@param schema SchemaResult | Schema
-M.set_buf_schema = function(bufnr, schema)
+function M.set_buf_schema(bufnr, schema)
   M.ctx.schema(bufnr, schema)
 end
 
 --- Get the schema used for a buffer.
 ---@param bufnr number: Buffer number
-M.get_buf_schema = function(bufnr)
-  return { result = { M.ctx.schema(bufnr) } }
-end
-
---- Loads a matcher.
----@param name string: Name of the matcher
-M.load_matcher = function(name)
-  return _matchers.load(name)
+function M.get_buf_schema(bufnr)
+  return { result = { require("yaml-companion.context").schema(bufnr) } }
 end
 
 --- Opens a vim.ui.select menu to choose a schema
-M.open_ui_select = function()
+function M.open_ui_select()
   require("yaml-companion.select.ui").open_ui_select()
-end
-
-M.get_matcher_parameters = function(name)
-  return require("yaml-companion.config").options.matcher_parameters[name]
-end
-
-M.set_matcher_parameters = function(name, params)
-  require("yaml-companion.config").options.matcher_parameters[name] = params
 end
 
 return M

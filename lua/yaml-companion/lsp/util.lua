@@ -6,7 +6,7 @@ local sync_timeout = 5000
 
 ---@param bufnr number
 ---@return vim.lsp.Client | nil
-M.get_client = function(bufnr)
+function M.get_client(bufnr)
   return vim.lsp.get_clients({ name = "yamlls", bufnr = bufnr })[1]
     or vim.lsp.get_clients({ name = "helm_ls", bufnr = bufnr })[1]
 end
@@ -14,7 +14,7 @@ end
 ---@param bufnr number
 ---@param method string
 ---@return table | nil
-M.request_sync = function(bufnr, method)
+function M.request_sync(bufnr, method)
   local client = require("yaml-companion.lsp.util").get_client(bufnr)
 
   if client then
@@ -22,11 +22,11 @@ M.request_sync = function(bufnr, method)
       client.request_sync(method, { vim.uri_from_bufnr(bufnr) }, sync_timeout, bufnr)
 
     if error then
-      log.fmt_error("bufnr=%d error=%s", bufnr, error)
+      log.error("bufnr=%d error=%s", bufnr, error)
     end
 
     if response and response.err then
-      log.fmt_error("bufnr=%d error=%s", bufnr, response.err)
+      log.error("bufnr=%d error=%s", bufnr, response.err)
     end
 
     return response

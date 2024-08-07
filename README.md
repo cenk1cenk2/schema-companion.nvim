@@ -42,7 +42,7 @@ use {
 ```lua
 {
   -- Built in file matchers
-  builtin_matchers = {
+  matchers = {
     -- Detects Kubernetes files based on content
     kubernetes = { enabled = true },
     cloud_init = { enabled = true }
