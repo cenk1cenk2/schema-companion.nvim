@@ -1,4 +1,6 @@
-local M = {}
+local M = {
+  kubernetes_version = "v1.28.12",
+}
 
 --local lsp = require("yaml-companion.lsp.requests")
 local matchers = require("yaml-companion._matchers")._loaded

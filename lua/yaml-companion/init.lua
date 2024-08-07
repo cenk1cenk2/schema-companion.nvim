@@ -2,9 +2,7 @@ local M = {}
 
 local _matchers = require("yaml-companion._matchers")
 
-M.ctx = {
-  kubernetes_version = "v1.28.12",
-}
+M.ctx = {}
 
 M.setup = function(opts)
   local config = require("yaml-companion.config")
