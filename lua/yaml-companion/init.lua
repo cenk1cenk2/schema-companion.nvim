@@ -1,7 +1,10 @@
 local M = {}
 
 local _matchers = require("yaml-companion._matchers")
-M.ctx = {}
+
+M.ctx = {
+  kubernetes_version = "v1.22.4",
+}
 
 M.setup = function(opts)
   local config = require("yaml-companion.config")
@@ -37,6 +40,10 @@ end
 --- Opens a vim.ui.select menu to choose a schema
 M.open_ui_select = function()
   require("yaml-companion.select.ui").open_ui_select()
+end
+
+M.set_kubernetes_version = function(version)
+  M.ctx.kubernetes_version = version
 end
 
 return M
