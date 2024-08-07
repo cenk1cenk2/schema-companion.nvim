@@ -5,7 +5,7 @@ local resources = require("yaml-companion.builtin.kubernetes.resources")
 
 M.get_schema = function()
   local uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/"
-    .. require("yaml-companion").ctx.kubernetes_version
+    .. require("yaml-companion.config").options.versions.kubernetes
     .. "-standalone-strict/all.json"
 
   local schema = {

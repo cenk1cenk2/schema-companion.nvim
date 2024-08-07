@@ -13,10 +13,6 @@ M.setup = function(opts)
 
   M.ctx = require("yaml-companion.context")
 
-  if config.options.versions.kubernetes then
-    M.set_kubernetes_version(config.options.versions.kubernetes)
-  end
-
   return config.options.lspconfig
 end
 
@@ -46,8 +42,8 @@ M.open_ui_select = function()
   require("yaml-companion.select.ui").open_ui_select()
 end
 
-M.set_kubernetes_version = function(version)
-  M.ctx.kubernetes_version = version
+M.set_version = function(name, version)
+  require("yaml-companion.config").options.versions[name] = version
 end
 
 return M

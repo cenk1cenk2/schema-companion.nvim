@@ -55,7 +55,7 @@ M.match = function(bufnr)
   end
 
   local builtInSchemaURI = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/"
-    .. require("yaml-companion").ctx.kubernetes_version
+    .. require("yaml-companion.config").options.versions.kubernetes
     .. "-standalone-strict/all.json"
 
   if isBuiltInResource(kind) then
