@@ -39,7 +39,7 @@ function M.from_matchers()
   ---@type Schema[]
   local r = {}
   for _, matcher in ipairs(matchers.get()) do
-    r = vim.tbl_extend("keep", r, matcher.handles())
+    r = vim.list_extend(r, matcher.handles())
   end
   return r
 end
@@ -59,9 +59,9 @@ end
 function M.all()
   local r = {}
 
-  r = vim.tbl_extend("keep", r, M.from_store())
-  r = vim.tbl_extend("keep", r, M.from_matchers())
-  r = vim.tbl_extend("keep", r, M.from_options())
+  r = vim.list_extend(r, M.from_store())
+  r = vim.list_extend(r, M.from_matchers())
+  r = vim.list_extend(r, M.from_options())
 
   return r
 end
