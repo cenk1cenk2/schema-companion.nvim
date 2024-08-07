@@ -33,8 +33,10 @@ M.defaults = {
       },
     },
   },
-  versions = {
-    kubernetes = "v1.22.4",
+  matcher_parameters = {
+    kubernetes = {
+      version = "v1.22.4",
+    },
   },
 }
 

@@ -25,7 +25,7 @@
 ---@field schemas Schema[] | SchemaResult
 ---@field lspconfig table
 ---@field builtin_matchers table
----@field versions table
+---@field matcher_parameters table
 
 ---@class Logger
 ---@field fmt_debug fun(fmt: string, ...: any)

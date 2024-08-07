@@ -26,8 +26,6 @@ end
 --- Get the schema used for a buffer.
 ---@param bufnr number: Buffer number
 M.get_buf_schema = function(bufnr)
-  -- TODO: remove the result and instead return a Schema directly
-  -- this will break existing clients :/
   return { result = { M.ctx.schema(bufnr) } }
 end
 
@@ -42,8 +40,12 @@ M.open_ui_select = function()
   require("yaml-companion.select.ui").open_ui_select()
 end
 
-M.set_version = function(name, version)
-  require("yaml-companion.config").options.versions[name] = version
+M.get_matcher_parameters = function(name)
+  return require("yaml-companion.config").options.matcher_parameters[name]
+end
+
+M.set_matcher_parameters = function(name, params)
+  require("yaml-companion.config").options.matcher_parameters[name] = params
 end
 
 return M
