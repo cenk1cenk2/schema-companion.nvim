@@ -1,0 +1,23 @@
+---
+# https://taskfile.dev
+
+version: '3'
+
+vars: {}
+
+env: {}
+
+tasks:
+  format:
+    desc: Format the repository.
+    cmds:
+      - stylua --config-path .stylua.toml . -v
+    sources:
+      - 'lua/**/*.lua'
+
+  lint:
+    desc: Lint the repository.
+    cmds:
+      - stylua --config-path .stylua.toml --check .
+    sources:
+      - 'lua/**/*.lua'

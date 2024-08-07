@@ -36,12 +36,7 @@ function M.autodiscover(bufnr, client)
   -- and we can use it right away
   if current_schema.name and current_schema.uri ~= schema.default_schema().uri then
     M.ctxs[bufnr].schema = current_schema
-    log.debug(
-      "bufnr=%d client_id=%d schema=%s an SchemaStore defined schema matched this file",
-      bufnr,
-      client.id,
-      current_schema.name or current_schema.uri
-    )
+    log.debug("bufnr=%d client_id=%d schema=%s an SchemaStore defined schema matched this file", bufnr, client.id, current_schema.name or current_schema.uri)
     return M.ctxs[bufnr].schema
 
     -- if it returned something without a name it means it came from our own
@@ -50,12 +45,7 @@ function M.autodiscover(bufnr, client)
     for _, option_schema in ipairs(schema.from_options()) do
       if option_schema.uri == current_schema.uri then
         M.ctxs[bufnr].schema = option_schema
-        log.debug(
-          "bufnr=%d client_id=%d schema=%s an user defined schema matched this file",
-          bufnr,
-          client.id,
-          option_schema.name
-        )
+        log.debug("bufnr=%d client_id=%d schema=%s an user defined schema matched this file", bufnr, client.id, option_schema.name)
         return M.ctxs[bufnr].schema
       end
     end
@@ -67,12 +57,7 @@ function M.autodiscover(bufnr, client)
     local result = matcher.match(bufnr)
     if result then
       M.schema(bufnr, result)
-      log.debug(
-        "bufnr=%d client_id=%d schema=%s a registered matcher matched this file",
-        bufnr,
-        client.id,
-        result.name
-      )
+      log.debug("bufnr=%d client_id=%d schema=%s a registered matcher matched this file", bufnr, client.id, result.name)
       return M.ctxs[bufnr].schema
     end
 

@@ -13,8 +13,7 @@ function M.request_sync(bufnr, method)
   local result = {}
 
   for _, client in pairs(clients) do
-    local response, error =
-      client.request_sync(method, { vim.uri_from_bufnr(bufnr) }, sync_timeout, bufnr)
+    local response, error = client.request_sync(method, { vim.uri_from_bufnr(bufnr) }, sync_timeout, bufnr)
 
     if error then
       log.error("bufnr=%d error=%s", bufnr, error)
