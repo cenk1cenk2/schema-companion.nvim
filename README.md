@@ -105,7 +105,6 @@ require("yaml-companion.ui").select_schema()
 
 ```lua
 local schema = require("yaml-companion").get_buf_schema(0)
-end
 ```
 
 This can be further utilized in `lualine` as follows.
