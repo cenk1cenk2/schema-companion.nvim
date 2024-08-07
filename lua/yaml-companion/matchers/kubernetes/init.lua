@@ -72,7 +72,7 @@ function M.match(bufnr)
   )
 
   if not resource.version or resource.group:match(".*k8s.io$") or resource.group:match("apps$") then
-    if resource.group then
+    if resource.version then
       return {
         name = ("Kubernetes [%s] [%s@%s/%s]"):format(
           M.config.version,
