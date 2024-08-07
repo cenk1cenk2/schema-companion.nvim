@@ -18,7 +18,7 @@ Currently in the dogfooding stage with matching all the resources, but the follo
 ```lua
 return {
   "cenk1cenk2/yaml-companion.nvim",
-  requires = {
+  dependencies = {
     { "neovim/nvim-lspconfig" },
     { "nvim-lua/plenary.nvim" },
     { "nvim-telescope/telescope.nvim" },
