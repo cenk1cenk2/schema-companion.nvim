@@ -58,9 +58,4 @@ function M.get_buffer_schema(bufnr)
   return require("yaml-companion.context").schema(bufnr)
 end
 
---- Opens a vim.ui.select menu to choose a schema
-function M.open_ui_select()
-  require("yaml-companion.select.ui").open_ui_select()
-end
-
 return M

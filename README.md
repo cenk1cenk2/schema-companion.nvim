@@ -95,7 +95,7 @@ require("telescope").extensions.yaml_schema.select_schema()
 Alternatively, you can use `vim.ui.select` to use the picker of your choice. In that case, you can bind/call the function as follows.
 
 ```lua
-require("yaml-companion").open_ui_select()
+require("yaml-companion.ui").select_schema()
 ```
 
 ### Current Schema
