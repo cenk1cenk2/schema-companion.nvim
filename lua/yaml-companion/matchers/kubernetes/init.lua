@@ -71,9 +71,14 @@ function M.match(bufnr)
     resource.kind or "unknown"
   )
 
-  if not resource.version then
+  if not resource.version or resource.group:match(".*k8s.io$") then
     return {
-      name = ("Kubernetes [%s] [%s@%s]"):format(M.config.version, resource.kind, resource.group),
+      name = ("Kubernetes [%s] [%s@%s/%s]"):format(
+        M.config.version,
+        resource.kind,
+        resource.group,
+        resource.version
+      ),
       uri = ("https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/%s-standalone-strict/%s-%s.json"):format(
         M.config.version,
         resource.kind:lower(),
