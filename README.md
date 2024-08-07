@@ -5,8 +5,8 @@ Forked from the original repository [someone-stole-my-name/yaml-companion.nvim](
 ## Features
 
 - Ability to add any kind of matcher, that can detect schema based on content.
-- Kubernetes resources can be matched utilizing the repository [yannh/kubernetes-json-schema](https://github.com/yannh/kubernetes-json-schema).
-- Kubernetes CRD definitions can be matched utilizing the repository [https://github.com/datreeio/CRDs-catalog](https://github.com/datreeio/crds-catalog). ![kubernetes-crd](./resources/screenshots/crd.png)
+- Kubernetes resources can be matched utilizing the repository [yannh/kubernetes-json-schema](https://github.com/yannh/kubernetes-json-schema). ![kubernetes](./resources/screenshots/kubernetes.png)
+- Kubernetes CRD definitions can be matched utilizing the repository [https://github.com/datreeio/CRDs-catalog](https://github.com/datreeio/crds-catalog). ![kubernetes-crd](./resources/screenshots/kubernetes-crd.png)
 
 ## Installation
 
