@@ -40,7 +40,7 @@ M.autodiscover = function(bufnr, client)
       "bufnr=%d client_id=%d schema=%s an SchemaStore defined schema matched this file",
       bufnr,
       client.id,
-      schema.name or "unknown"
+      schema.name
     )
     return M.ctxs[bufnr].schema
 
@@ -92,7 +92,7 @@ end
 ---@param bufnr number
 ---@param client vim.lsp.client
 M.setup = function(bufnr, client)
-  if not vim.tbl_contains({ "yamlls", "helm_ls" }, client.name) then
+  if client.name ~= "yamlls" then
     return
   end
 
@@ -101,6 +101,16 @@ M.setup = function(bufnr, client)
   if require("yaml-companion.config").options.formatting then
     client.server_capabilities.documentFormattingProvider = true
     client.server_capabilities.documentRangeFormattingProvider = true
+  end
+
+  -- remove yamlls from not yaml files
+  -- https://github.com/towolf/vim-helm/issues/15
+  if vim.bo[bufnr].buftype ~= "" or vim.bo[bufnr].filetype == "helm" then
+    vim.diagnostic.disable(bufnr)
+    vim.defer_fn(function()
+      vim.diagnostic.reset(nil, bufnr)
+    end, 1000)
+    vim.lsp.buf_detach_client(bufnr, client.id)
   end
 
   local state = {
@@ -143,35 +153,16 @@ M.schema = function(bufnr, new_schema)
     local settings = client.settings
 
     -- we don't want more than 1 schema per file
-    if client.name == "helm_ls" then
-      for key, _ in pairs(settings["helm-ls"].yamlls.config.schemas) do
-        if settings["helm-ls"].yamlls.config.schemas[key] == bufuri then
-          settings["helm-ls"].yamlls.config.schemas[key] = nil
-        end
-      end
-    -- try to parse this as yaml compatible language server
-    else
-      for key, _ in pairs(settings.yaml.schemas) do
-        if settings.yaml.schemas[key] == bufuri then
-          settings.yaml.schemas[key] = nil
-        end
+    for key, _ in pairs(settings.yaml.schemas) do
+      if settings.yaml.schemas[key] == bufuri then
+        settings.yaml.schemas[key] = nil
       end
     end
 
     local override = {}
     override[new_schema.uri] = bufuri
 
-    log.fmt_debug("lsp=%s file=%s schema=%s set new override", client.name, bufuri, new_schema.uri)
-
-    if client.name == "helm_ls" then
-      settings = vim.tbl_deep_extend(
-        "force",
-        settings,
-        { ["helm-ls"] = { yamlls = { config = { schemas = override } } } }
-      )
-    else
-      settings = vim.tbl_deep_extend("force", settings, { yaml = { schemas = override } })
-    end
+    log.fmt_debug("file=%s schema=%s set new override", bufuri, new_schema.uri)
 
     settings = vim.tbl_deep_extend("force", settings, { yaml = { schemas = override } })
     client.settings = vim.tbl_deep_extend("force", settings, { yaml = { schemas = override } })
