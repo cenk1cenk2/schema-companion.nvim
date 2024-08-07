@@ -1,120 +1,126 @@
-# yaml-companion.nvim [![Build](https://github.com/someone-stole-my-name/yaml-companion.nvim/actions/workflows/main.yml/badge.svg)](https://github.com/someone-stole-my-name/yaml-companion.nvim/actions/workflows/main.yml)
+# yaml-companion.nvim
 
-![telescope](./resources/screenshots/telescope.png)
-![statusbar](./resources/screenshots/statusbar.png)
+Forked from the original repository [someone-stole-my-name/yaml-companion.nvim](https://github.com/someone-stole-my-name/yaml-companion.nvim) and expanded for a bit more modularity to work with multiple language servers like `yaml-language-server` and `helm-ls` at the same time as well as automatic Kubernetes CRD detection.
 
-## ⚡️ Requirements
+## Features
 
-- [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
-- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
-- [yaml-language-server](https://github.com/redhat-developer/yaml-language-server)
+- Ability to add any kind of matcher, that can detect schema based on content.
+- Kubernetes resources can be matched utilizing the repository [yannh/kubernetes-json-schema](https://github.com/yannh/kubernetes-json-schema).
+- Kubernetes CRD definitions can be matched utilizing the repository [https://github.com/datreeio/CRDs-catalog](https://github.com/datreeio/crds-catalog). ![kubernetes-crd](./resources/screenshots/crd.png)
 
-## ✨ Features
+## Installation
 
-- Builtin Kubernetes manifest autodetection
-- Get/Set specific JSON schema per buffer
-- Extensible autodetection + Schema Store support 
-
-## 📦 Installation
-
-Install the plugin and load the `telescope` extension with your preferred package manager:
-
-**Packer**
+### lazy.nvim
 
 ```lua
-use {
-  "someone-stole-my-name/yaml-companion.nvim",
+return {
+  "cenk1cenk2/yaml-companion.nvim",
   requires = {
-      { "neovim/nvim-lspconfig" },
-      { "nvim-lua/plenary.nvim" },
-      { "nvim-telescope/telescope.nvim" },
+    { "neovim/nvim-lspconfig" },
+    { "nvim-lua/plenary.nvim" },
+    { "nvim-telescope/telescope.nvim" },
   },
   config = function()
+    require("yaml-companion").setup({
+      matchers = {
+        -- add your matchers
+        require("yaml-companion.matchers.kubernetes").setup({ version = "master" }),
+      },
+    })
+
     require("telescope").load_extension("yaml_schema")
   end,
 }
 ```
 
-## ⚙️  Configuration
+## Configuration
 
-**yaml-companion** comes with the following defaults:
+Plugin has to be configured once and the language servers can be added by extending the LSP configuration.
+
+### Setup
+
+The default plugin configuration for the setup function is as below.
 
 ```lua
-{
-  -- Built in file matchers
-  matchers = {
-    -- Detects Kubernetes files based on content
-    kubernetes = { enabled = true },
-    cloud_init = { enabled = true }
-  },
+require("yaml-companion").setup({
+  log_level = "info",
+  formatting = true,
+  matchers = {},
+  schemas = {},
+}
 
-  -- Additional schemas available in Telescope picker
-  schemas = {
-    --{
-      --name = "Kubernetes 1.22.4",
-      --uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.22.4-standalone-strict/all.json",
-    --},
-  },
+```
 
-  -- Pass any additional options that will be merged in the final LSP config
-  lspconfig = {
-    flags = {
-      debounce_text_changes = 150,
-    },
-    settings = {
-      redhat = { telemetry = { enabled = false } },
-      yaml = {
-        validate = true,
-        format = { enable = true },
-        hover = true,
-        schemaStore = {
-          enable = true,
-          url = "https://www.schemastore.org/api/json/catalog.json",
-        },
-        schemaDownload = { enable = true },
-        schemas = {},
-        trace = { server = "debug" },
-      },
-    },
+### Language Server Configuration
+
+You can automatically extend your configuration of the `yaml-language-server` or `helm-ls` with the following configuration.
+
+```lua
+require("lspconfig").yamlls.setup(require("yaml-companion").setup_client({
+  -- your yaml language server configuration
+}))
+```
+
+### Manual Schemas
+
+You can add custom schemas that can be activated manually through the telescope picker.
+
+```lua
+schemas = {
+  {
+    name = "Kubernetes master",
+    uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/all.json",
+  },
+  {
+    name = "Kubernetes v1.30",
+    uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.30.3-standalone-strict/all.json",
   },
 }
 ```
 
+### Matchers
+
+Adding custom matchers are as easy as defining a function that detects and handles a schema.
+
+## Usage
+
+### Schema Picker
+
+You can map the `telescope` picker to any keybinding of your choice.
+
 ```lua
-local cfg = require("yaml-companion").setup({
-  -- Add any options here, or leave empty to use the default settings
-  -- lspconfig = {
-  --   cmd = {"yaml-language-server"}
-  -- },
-})
-require("lspconfig")["yamlls"].setup(cfg)
+require("telescope").extensions.yaml_schema.select_schema()
 ```
 
-## 🚀 Usage
+Alternatively, you can use `vim.ui.select` to use the picker of your choice. In that case, you can bind/call the function as follows.
 
-### Select a schema for the current buffer
-
-No mappings included, you need to map it yourself or call it manually:
-
-```
-:Telescope yaml_schema
-```
-
-Alternatively, you can use `vim.ui.select` to use the picker of your choice. In that case, you can bind/call the function:
 ```lua
 require("yaml-companion").open_ui_select()
 ```
 
-### Get the schema name for the current buffer
-
-You can show the current schema in your statusline using a function like:
+### Current Schema
 
 ```lua
-local function get_schema()
-  local schema = require("yaml-companion").get_buf_schema(0)
-  if schema.result[1].name == "none" then
-    return ""
-  end
-  return schema.result[1].name
+local schema = require("yaml-companion").get_buf_schema(0)
 end
+```
+
+This can be further utilized in `lualine` as follows.
+
+```lua
+-- your lualine configuration
+require("lualine").setup({
+  sections = {
+    lualine_c = {
+      {
+        function()
+          return ("%s"):format(require("yaml-companion").get_buffer_schema(0).name)
+        end,
+        cond = function()
+          return package.loaded["yaml-companion"]
+        end,
+      },
+    },
+  },
+})
 ```

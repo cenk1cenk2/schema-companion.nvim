@@ -6,7 +6,7 @@ local conf = require("telescope.config").values
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 
-local yaml_schema = function(opts)
+local select_schema = function(opts)
   local results = require("yaml-companion.schema").all()
 
   if #results == 0 then
@@ -41,8 +41,8 @@ local yaml_schema = function(opts)
     :find()
 end
 
-M.yaml_schema = function(opts)
-  yaml_schema(require("telescope.themes").get_dropdown({}))
+M.select_schema = function(opts)
+  select_schema(require("telescope.themes").get_dropdown({}))
 end
 
 return M
