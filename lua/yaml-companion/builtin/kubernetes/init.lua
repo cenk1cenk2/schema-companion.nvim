@@ -2,11 +2,10 @@ local M = {}
 
 local api = vim.api
 local resources = require("yaml-companion.builtin.kubernetes.resources")
-local ctx = require("yaml-companion").ctx
 
 M.get_schema = function()
   local uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/"
-    .. ctx.kubernetes_version
+    .. require("yaml-companion").ctx.kubernetes_version
     .. "-standalone-strict/all.json"
 
   local schema = {
