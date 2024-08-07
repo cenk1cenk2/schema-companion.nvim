@@ -2,6 +2,8 @@
 
 Forked from the original repository [someone-stole-my-name/yaml-companion.nvim](https://github.com/someone-stole-my-name/yaml-companion.nvim) and expanded for a bit more modularity to work with multiple language servers like `yaml-language-server` and `helm-ls` at the same time as well as automatic Kubernetes CRD detection. I have been happily using the plugin with some caveats, so I wanted to refactor it a bit to match my current mostly Kubernetes working environment.
 
+Currently in the dogfooding stage with matching all the resources, but the following features are available.
+
 ## Features
 
 - Ability to add any kind of matcher, that can detect schema based on content.
