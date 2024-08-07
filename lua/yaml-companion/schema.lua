@@ -56,9 +56,11 @@ end
 
 ---@return Schema[]
 function M.all()
-  local r = M.from_options()
-  r = vim.tbl_extend("keep", r, M.from_matchers())
+  local r = {}
+
   r = vim.tbl_extend("keep", r, M.from_store())
+  r = vim.tbl_extend("keep", r, M.from_options())
+  r = vim.tbl_extend("keep", r, M.from_matchers())
   return r
 end
 
