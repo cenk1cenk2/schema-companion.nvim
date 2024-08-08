@@ -29,7 +29,7 @@ end
 
 -- get all known schemas by the yamlls attached to {bufnr}
 ---@param bufnr number
----@return SchemaResult | nil
+---@return Schema | nil
 function M.get_all_schemas(bufnr)
   local response = M.request_sync(bufnr, "yaml/get/all/jsonSchemas")
 
@@ -38,20 +38,18 @@ end
 
 -- Get matching schemas to current buffer.
 ---@param bufnr number
----@return SchemaResult[] | nil
-function M.get_matching_schemas(bufnr)
+---@return Schema[] | nil
+function M.get_schemas(bufnr)
   local response = M.request_sync(bufnr, "yaml/get/jsonSchema")
 
-  if response and #response > 0 then
-    return response
-  end
+  return response
 end
 
 -- get schema used for {bufnr} from the yamlls attached to it
 ---@param bufnr number
----@return SchemaResult | nil
+---@return Schema | nil
 function M.get_schema(bufnr)
-  local response = M.request_sync(bufnr, "yaml/get/jsonSchema")
+  local response = M.get_schemas(bufnr)
 
   if response and response[1] then
     return response[1]

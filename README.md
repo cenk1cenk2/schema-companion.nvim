@@ -10,6 +10,7 @@ Currently in the dogfooding stage with matching all the resources, but the follo
 - Kubernetes resources can be matched utilizing the repository [yannh/kubernetes-json-schema](https://github.com/yannh/kubernetes-json-schema). ![kubernetes](./resources/screenshots/kubernetes.png)
 - Kubernetes CRD definitions can be matched utilizing the repository [datreeio/CRDs-catalog](https://github.com/datreeio/crds-catalog). ![kubernetes-crd](./resources/screenshots/kubernetes-crd.png)
 - Change matcher variables on the fly, like the Kubernetes version. Do not be stuck with whatever `yaml-language-server` has hardcoded at the given time. ![kubernetes-version](./resources/screenshots/kubernetes-version.png)
+- Select one from multiple matchers for the current buffer to not have any collisions in the `yaml-language-server`.
 
 ## Installation
 
@@ -99,7 +100,7 @@ require("telescope").extensions.yaml_schema.select_schema()
 If there are multiple matches for the buffer, you can select the schema manually from the ones that matches.
 
 ```lua
-require("telescope").extensions.yaml_schema.select_buffer_matching_schema()
+require("telescope").extensions.yaml_schema.select_from_matching_schemas()
 ```
 
 ### Current Schema

@@ -66,7 +66,7 @@ function M.all()
   return r
 end
 
----@return Schema
+---@return Schema | nil
 ---@param bufnr number
 function M.current(bufnr)
   local schema = lsp.get_schema(bufnr)
@@ -78,16 +78,12 @@ function M.current(bufnr)
   return schema
 end
 
----@return Schema
+---@return Schema[] | nil
 ---@param bufnr number
 function M.matching(bufnr)
-  local schema = lsp.get_matching_schemas(bufnr)
+  local schemas = lsp.get_schemas(bufnr)
 
-  if not schema then
-    return M.default_schema()
-  end
-
-  return schema
+  return schemas
 end
 
 return M

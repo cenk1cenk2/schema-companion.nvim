@@ -11,7 +11,7 @@ M.initialized_client_ids = {}
 
 ---@param bufnr number
 ---@param client vim.lsp.client
----@return SchemaResult | nil
+---@return Schema | nil
 function M.autodiscover(bufnr, client)
   if not M.ctxs[bufnr] then
     log.error("bufnr=%d client_id=%d doesn't exists", bufnr, client.id)
@@ -94,7 +94,7 @@ end
 
 --- gets or sets the schema in its context and lsp
 ---@param bufnr number
----@param data Schema | SchemaResult | nil
+---@param data Schema | Schema[] | nil
 ---@return Schema
 function M.schema(bufnr, data)
   if bufnr == 0 then
@@ -134,7 +134,7 @@ end
 
 --- Set the schema used for a buffer.
 ---@param bufnr number: Buffer number
----@param schema SchemaResult | Schema
+---@param s Schema[] | Schema
 function M.set_buffer_schema(bufnr, s)
   return M.schema(bufnr, s)
 end

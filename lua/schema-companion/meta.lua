@@ -12,8 +12,6 @@
 ---@field name string | nil
 ---@field uri string
 
----@alias SchemaResult { result: Schema[] }
-
 ---@class Matcher
 ---@field match fun(bufnr: number): Schema | nil
 ---@field handles fun(): Schema[]
@@ -26,7 +24,7 @@
 ---@field log_level "debug" | "trace" | "info" | "warn" | "error" | "fatal"
 ---@field formatting boolean
 ---@field enable_telescope boolean
----@field schemas Schema[] | SchemaResult
+---@field schemas Schema[
 ---@field matchers Matcher[]
 
 ---@class Logger
