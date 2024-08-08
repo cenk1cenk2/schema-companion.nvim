@@ -67,7 +67,7 @@ function M.store_initialized(_, _, req, _)
   for _, bufnr in ipairs(buffers) do
     log.debug("client_id=%s bufnr=%d running autodiscover", client_id, bufnr)
 
-    require("schema-companion.context").autodiscover(bufnr, client)
+    require("schema-companion.context").discover(bufnr, client)
   end
 end
 

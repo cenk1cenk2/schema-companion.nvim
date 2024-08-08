@@ -12,7 +12,7 @@ M.initialized_client_ids = {}
 ---@param bufnr number
 ---@param client vim.lsp.Client
 ---@return Schema | nil
-function M.autodiscover(bufnr, client)
+function M.discover(bufnr, client)
   coroutine.resume(coroutine.create(function()
     if not M.ctx[bufnr] then
       log.error("bufnr=%d client_id=%d doesn't exists", bufnr, client.id)
@@ -90,7 +90,7 @@ function M.setup(bufnr, client)
 
   M.ctx[bufnr] = state
 
-  M.autodiscover(bufnr, client)
+  M.discover(bufnr, client)
 end
 
 --- gets or sets the schema in its context and lsp
