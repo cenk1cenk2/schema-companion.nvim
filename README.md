@@ -96,16 +96,16 @@ You can map the `telescope` picker to any keybinding of your choice.
 require("telescope").extensions.yaml_schema.select_schema()
 ```
 
-Alternatively, you can use `vim.ui.select` to use the picker of your choice. In that case, you can bind/call the function as follows.
+If there are multiple matches for the buffer, you can select the schema manually from the ones that matches.
 
 ```lua
-require("schema-companion.ui").select_schema()
+require("telescope").extensions.yaml_schema.select_buffer_matching_schema()
 ```
 
 ### Current Schema
 
 ```lua
-local schema = require("schema-companion").get_buf_schema(0)
+local schema = require("schema-companion").get_buf_schema(vim.api.nvim_get_current_buf())
 ```
 
 This can be further utilized in `lualine` as follows.

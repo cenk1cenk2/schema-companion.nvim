@@ -47,7 +47,7 @@ end
 --- Matcher defined schemas
 ---@return Schema[]
 function M.from_store()
-  local schemas = lsp.get_all_jsonschemas(0)
+  local schemas = lsp.get_all_schemas(0)
   if schemas == nil or vim.tbl_count(schemas or {}) == 0 then
     return {}
   end
@@ -69,7 +69,19 @@ end
 ---@return Schema
 ---@param bufnr number
 function M.current(bufnr)
-  local schema = lsp.get_jsonschema(bufnr)
+  local schema = lsp.get_schema(bufnr)
+
+  if not schema then
+    return M.default_schema()
+  end
+
+  return schema
+end
+
+---@return Schema
+---@param bufnr number
+function M.matching(bufnr)
+  local schema = lsp.get_matching_schemas(bufnr)
 
   if not schema then
     return M.default_schema()
