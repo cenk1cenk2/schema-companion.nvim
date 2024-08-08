@@ -25,20 +25,20 @@ return {
   },
   config = function()
     require("yaml-companion").setup({
+      -- if you have telescope you can register the extension
+      enable_telescope = true,
       matchers = {
         -- add your matchers
         require("yaml-companion.matchers.kubernetes").setup({ version = "master" }),
       },
     })
-
-    require("telescope").load_extension("yaml_schema")
   end,
 }
 ```
 
 ## Configuration
 
-Plugin has to be configured once and the language servers can be added by extending the LSP configuration.
+Plugin has to be configured once, and the language servers can be added by extending the LSP configuration.
 
 ### Setup
 
@@ -48,6 +48,7 @@ The default plugin configuration for the setup function is as below.
 require("yaml-companion").setup({
   log_level = "info",
   formatting = true,
+  enable_telescope = false,
   matchers = {},
   schemas = {},
 }

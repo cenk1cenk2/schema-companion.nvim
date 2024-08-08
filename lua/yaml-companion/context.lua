@@ -132,4 +132,17 @@ function M.schema(bufnr, data)
   return M.ctxs[bufnr].schema
 end
 
+--- Set the schema used for a buffer.
+---@param bufnr number: Buffer number
+---@param schema SchemaResult | Schema
+function M.set_buffer_schema(bufnr, s)
+  return M.schema(bufnr, s)
+end
+
+--- Get the schema used for a buffer.
+---@param bufnr number: Buffer number
+function M.get_buffer_schema(bufnr)
+  return M.schema(bufnr)
+end
+
 return M

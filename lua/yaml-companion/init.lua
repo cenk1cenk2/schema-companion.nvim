@@ -1,9 +1,13 @@
-local M = {}
+local M = {
+  set_buffer_schema = require("yaml-companion.context").set_buffer_schema,
+  get_buffer_schema = require("yaml-companion.context").get_buffer_schema,
+}
 
 ---@type ConfigOptions
 M.config = {
   log_level = "info",
   formatting = true,
+  enable_telescope = false,
   matchers = {},
   schemas = {},
 }
@@ -15,6 +19,12 @@ function M.setup(config)
   M.config = vim.tbl_deep_extend("force", M.config, config or {})
 
   local log = require("yaml-companion.log").new({ level = M.config.log_level })
+
+  if M.config.enable_telescope then
+    pcall(function()
+      return require("telescope").load_extension("yaml_schema")
+    end, debug.traceback)
+  end
 
   log.debug("yaml-companion has been setup: %s", M.config)
 
@@ -43,19 +53,6 @@ function M.setup_client(config)
       ["yaml/schema/store/initialized"] = require("yaml-companion.lsp").store_initialized,
     }),
   })
-end
-
---- Set the schema used for a buffer.
----@param bufnr number: Buffer number
----@param schema SchemaResult | Schema
-function M.set_buffer_schema(bufnr, schema)
-  return require("yaml-companion.context").schema(bufnr, schema)
-end
-
---- Get the schema used for a buffer.
----@param bufnr number: Buffer number
-function M.get_buffer_schema(bufnr)
-  return require("yaml-companion.context").schema(bufnr)
 end
 
 return M
