@@ -117,7 +117,7 @@ require("lualine").setup({
     lualine_c = {
       {
         function()
-          return ("%s"):format(require("schema-companion").get_buffer_schema(0).name)
+          return ("%s"):format(require("schema-companion.context").get_buffer_schema(0).name)
         end,
         cond = function()
           return package.loaded["schema-companion"]

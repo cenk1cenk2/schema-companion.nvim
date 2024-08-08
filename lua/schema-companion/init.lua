@@ -1,7 +1,4 @@
-local M = {
-  set_buffer_schema = require("schema-companion.context").set_buffer_schema,
-  get_buffer_schema = require("schema-companion.context").get_buffer_schema,
-}
+local M = {}
 
 ---@type ConfigOptions
 M.config = {
