@@ -15,7 +15,10 @@ end
 
 ---@return Schema
 function M.default_schema()
-  return { name = "none", uri = "none" }
+  return {
+    name = "none",
+    uri = "none",
+  }
 end
 
 --- User defined schemas

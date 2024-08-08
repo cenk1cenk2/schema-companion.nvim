@@ -18,7 +18,7 @@ function M.setup(config)
   local log = require("schema-companion.log").new({ level = M.config.log_level })
 
   if M.config.enable_telescope then
-    pcall(function()
+    xpcall(function()
       return require("telescope").load_extension("yaml_schema")
     end, debug.traceback)
   end
@@ -33,7 +33,17 @@ function M.setup(config)
 end
 
 function M.setup_client(config)
-  local add_hook_after = require("lspconfig.util").add_hook_after
+  -- taken from require("lspconfig.util").add_hook_after to drop dependency
+  local add_hook_after = function(func, new_fn)
+    if func then
+      return function(...)
+        func(...)
+        return new_fn(...)
+      end
+    else
+      return new_fn
+    end
+  end
 
   return vim.tbl_deep_extend("force", {}, config, {
     on_attach = add_hook_after(config.on_attach, function(client, bufnr)

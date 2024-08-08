@@ -1,16 +1,9 @@
 ---@meta
 
----@class vim.lsp.client
----@field id number
----@field name string
----@field server_capabilities table
----@field config table
----@field workspace_did_change_configuration fun(settings: table)
----@field request_sync fun(method: string, params: table | nil, timeout_ms: number | nil, bufnr: number): { err: string, result: string} | nil, string
-
 ---@class Schema
----@field name string | nil
+---@field name? string
 ---@field uri string
+---@field description? string
 
 ---@class Matcher
 ---@field match fun(bufnr: number): Schema | nil
@@ -24,7 +17,7 @@
 ---@field log_level "debug" | "trace" | "info" | "warn" | "error" | "fatal"
 ---@field formatting boolean
 ---@field enable_telescope boolean
----@field schemas Schema[
+---@field schemas Schema[]
 ---@field matchers Matcher[]
 
 ---@class Logger

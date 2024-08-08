@@ -37,6 +37,12 @@ function M.change_version()
   end)
 end
 
+local builtin_resource_regex = {
+  [[.*k8s.io$]],
+  [[^apps$]],
+  [[^batch$]],
+}
+
 function M.match(bufnr)
   local resource = {}
 
@@ -71,7 +77,9 @@ function M.match(bufnr)
     resource.kind or "unknown"
   )
 
-  if not resource.version or resource.group:match(".*k8s.io$") or resource.group:match("apps$") then
+  if not resource.version or #vim.tbl_filter(function(regex)
+    return resource.group:match(regex)
+  end, builtin_resource_regex) > 0 then
     local _, _, resource_group = resource.group:find([[^([^.]*)]])
 
     if resource.version then

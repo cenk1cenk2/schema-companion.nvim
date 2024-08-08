@@ -3,9 +3,7 @@ local health = vim.health
 local M = {}
 
 local plugins = {
-  { lib = "plenary", optional = false },
-  { lib = "telescope", optional = true, info = "Install to use the telescope schema picker" },
-  { lib = "lspconfig", optional = false },
+  { lib = "telescope", optional = true, info = "Install to use the telescope schema picker." },
 }
 
 local binaries = {

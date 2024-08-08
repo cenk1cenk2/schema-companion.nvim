@@ -27,9 +27,11 @@ local build_select_picker = function(title, results, bufnr, opts)
           actions.close(prompt_bufnr)
 
           local selection = action_state.get_selected_entry()
-          local schema = { name = selection.value.name or selection.value.uri, uri = selection.value.uri }
 
-          require("schema-companion.context").schema(bufnr, schema)
+          require("schema-companion.context").schema(bufnr, {
+            name = selection.value.name or selection.value.uri,
+            uri = selection.value.uri,
+          })
         end)
         return true
       end,
