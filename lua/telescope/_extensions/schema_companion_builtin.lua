@@ -7,7 +7,7 @@ local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 
 local select_schema = function(opts)
-  local results = require("yaml-companion.schema").all()
+  local results = require("schema-companion.schema").all()
 
   if #results == 0 then
     return
@@ -33,7 +33,7 @@ local select_schema = function(opts)
           actions.close(prompt_bufnr)
           local selection = action_state.get_selected_entry()
           local schema = { name = selection.value.name, uri = selection.value.uri }
-          require("yaml-companion.context").schema(0, schema)
+          require("schema-companion.context").schema(0, schema)
         end)
         return true
       end,

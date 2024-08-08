@@ -1,9 +1,9 @@
 local M = {}
 
-local matchers = require("yaml-companion.matchers")
-local schema = require("yaml-companion.schema")
+local matchers = require("schema-companion.matchers")
+local schema = require("schema-companion.schema")
 
-local log = require("yaml-companion.log")
+local log = require("schema-companion.log")
 
 ---@type { client: vim.lsp.client, schema: Schema, executed: boolean}[]
 M.ctxs = {}
@@ -74,7 +74,7 @@ end
 function M.setup(bufnr, client)
   -- The server does support formatting but it is disabled by default
   -- https://github.com/redhat-developer/yaml-language-server/issues/486
-  if require("yaml-companion").config.formatting then
+  if require("schema-companion").config.formatting then
     client.server_capabilities.documentFormattingProvider = true
     client.server_capabilities.documentRangeFormattingProvider = true
   end

@@ -1,6 +1,6 @@
 local M = {}
 
-local log = require("yaml-companion.log")
+local log = require("schema-companion.log")
 
 local sync_timeout = 5000
 
@@ -50,7 +50,7 @@ end
 function M.store_initialized(_, _, req, _)
   local client_id = req.client_id
 
-  require("yaml-companion.context").initialized_client_ids[client_id] = true
+  require("schema-companion.context").initialized_client_ids[client_id] = true
 
   local client = vim.lsp.get_client_by_id(client_id)
   local buffers = vim.lsp.get_buffers_by_client_id(client_id)
@@ -58,7 +58,7 @@ function M.store_initialized(_, _, req, _)
   for _, bufnr in ipairs(buffers) do
     log.debug("client_id=%s bufnr=%d running autodiscover", client_id, bufnr)
 
-    require("yaml-companion.context").autodiscover(bufnr, client)
+    require("schema-companion.context").autodiscover(bufnr, client)
   end
 end
 

@@ -2,7 +2,7 @@ local M = {}
 
 M.matchers = {}
 
-local log = require("yaml-companion.log")
+local log = require("schema-companion.log")
 
 function M.get()
   return M.matchers

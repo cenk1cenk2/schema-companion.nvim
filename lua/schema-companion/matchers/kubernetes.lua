@@ -1,6 +1,6 @@
 local M = {}
 
-local log = require("yaml-companion.log")
+local log = require("schema-companion.log")
 
 M.name = "Kubernetes"
 

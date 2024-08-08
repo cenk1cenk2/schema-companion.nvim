@@ -1,8 +1,8 @@
 local M = {}
 
-local config = require("yaml-companion").config
-local matchers = require("yaml-companion.matchers")
-local lsp = require("yaml-companion.lsp")
+local config = require("schema-companion").config
+local matchers = require("schema-companion.matchers")
+local lsp = require("schema-companion.lsp")
 
 ---@param schema Schema
 ---@return boolean

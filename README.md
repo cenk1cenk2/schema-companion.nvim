@@ -1,4 +1,4 @@
-# yaml-companion.nvim
+# schema-companion.nvim
 
 Forked from the original repository [someone-stole-my-name/yaml-companion.nvim](https://github.com/someone-stole-my-name/yaml-companion.nvim) and expanded for a bit more modularity to work with multiple language servers like `yaml-language-server` and `helm-ls` at the same time as well as automatic Kubernetes CRD detection. I have been happily using the plugin with some caveats, so I wanted to refactor it a bit to match my current mostly Kubernetes working environment.
 
@@ -17,19 +17,19 @@ Currently in the dogfooding stage with matching all the resources, but the follo
 
 ```lua
 return {
-  "cenk1cenk2/yaml-companion.nvim",
+  "cenk1cenk2/schema-companion.nvim",
   dependencies = {
     { "neovim/nvim-lspconfig" },
     { "nvim-lua/plenary.nvim" },
     { "nvim-telescope/telescope.nvim" },
   },
   config = function()
-    require("yaml-companion").setup({
+    require("schema-companion").setup({
       -- if you have telescope you can register the extension
       enable_telescope = true,
       matchers = {
         -- add your matchers
-        require("yaml-companion.matchers.kubernetes").setup({ version = "master" }),
+        require("schema-companion.matchers.kubernetes").setup({ version = "master" }),
       },
     })
   end,
@@ -45,7 +45,7 @@ Plugin has to be configured once, and the language servers can be added by exten
 The default plugin configuration for the setup function is as below.
 
 ```lua
-require("yaml-companion").setup({
+require("schema-companion").setup({
   log_level = "info",
   formatting = true,
   enable_telescope = false,
@@ -60,7 +60,7 @@ require("yaml-companion").setup({
 You can automatically extend your configuration of the `yaml-language-server` or `helm-ls` with the following configuration.
 
 ```lua
-require("lspconfig").yamlls.setup(require("yaml-companion").setup_client({
+require("lspconfig").yamlls.setup(require("schema-companion").setup_client({
   -- your yaml language server configuration
 }))
 ```
@@ -99,13 +99,13 @@ require("telescope").extensions.yaml_schema.select_schema()
 Alternatively, you can use `vim.ui.select` to use the picker of your choice. In that case, you can bind/call the function as follows.
 
 ```lua
-require("yaml-companion.ui").select_schema()
+require("schema-companion.ui").select_schema()
 ```
 
 ### Current Schema
 
 ```lua
-local schema = require("yaml-companion").get_buf_schema(0)
+local schema = require("schema-companion").get_buf_schema(0)
 ```
 
 This can be further utilized in `lualine` as follows.
@@ -117,10 +117,10 @@ require("lualine").setup({
     lualine_c = {
       {
         function()
-          return ("%s"):format(require("yaml-companion").get_buffer_schema(0).name)
+          return ("%s"):format(require("schema-companion").get_buffer_schema(0).name)
         end,
         cond = function()
-          return package.loaded["yaml-companion"]
+          return package.loaded["schema-companion"]
         end,
       },
     },

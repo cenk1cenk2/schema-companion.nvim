@@ -49,7 +49,7 @@ function M.check()
     end
   end
 
-  for _, matcher in ipairs(require("yaml-companion.matchers").get()) do
+  for _, matcher in ipairs(require("schema-companion.matchers").get()) do
     health.start(string.format("Matcher: %s", matcher.name))
     matcher.health()
   end

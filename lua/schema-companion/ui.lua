@@ -1,7 +1,7 @@
 local M = {}
 
 function M.select_schema()
-  local schemas = require("yaml-companion.schema").all()
+  local schemas = require("schema-companion.schema").all()
 
   -- Don't open selection if there are no available schemas
   if #schemas == 0 then
@@ -18,7 +18,7 @@ function M.select_schema()
       return
     end
     local selected_schema = { name = schema.name, uri = schema.uri }
-    require("yaml-companion.context").schema(0, selected_schema)
+    require("schema-companion.context").schema(0, selected_schema)
   end)
 end
 
