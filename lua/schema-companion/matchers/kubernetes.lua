@@ -41,6 +41,7 @@ local builtin_resource_regex = {
   [[.*k8s.io$]],
   [[^apps$]],
   [[^batch$]],
+  [[^autoscaling$]],
 }
 
 function M.match(bufnr)
