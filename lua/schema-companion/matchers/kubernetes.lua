@@ -42,6 +42,7 @@ local builtin_resource_regex = {
   [[^apps$]],
   [[^batch$]],
   [[^autoscaling$]],
+  [[^policy$]],
 }
 
 function M.match(bufnr)
