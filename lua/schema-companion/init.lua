@@ -1,17 +1,16 @@
 local M = {}
 
----@type ConfigOptions
+---@type schema_companion.Config
 M.config = {
   log_level = "info",
-  formatting = true,
   enable_telescope = false,
   matchers = {},
   schemas = {},
 }
 
----
----@param config ConfigOptions
----@return ConfigOptions
+--- Configures the schema-companion plugin.
+---@param config schema_companion.Config
+---@return schema_companion.Config
 function M.setup(config)
   M.config = vim.tbl_deep_extend("force", M.config, config or {})
 
@@ -32,6 +31,9 @@ function M.setup(config)
   return M.config
 end
 
+--- Configures a LSP client with the schema-companion handlers.
+---@param config any
+---@returns any
 function M.setup_client(config)
   -- taken from require("lspconfig.util").add_hook_after to drop dependency
   local add_hook_after = function(func, new_fn)

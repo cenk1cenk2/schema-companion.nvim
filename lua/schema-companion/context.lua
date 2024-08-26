@@ -5,13 +5,13 @@ local schema = require("schema-companion.schema")
 
 local log = require("schema-companion.log")
 
----@type { client: vim.lsp.Client, schema: Schema, executed: boolean}[]
+---@type { client: vim.lsp.Client, schema: schema_companion.Schema, executed: boolean}[]
 M.ctx = {}
 M.initialized_client_ids = {}
 
 ---@param bufnr number
 ---@param client vim.lsp.Client
----@return Schema | nil
+---@return schema_companion.Schema | nil
 function M.discover(bufnr, client)
   coroutine.resume(coroutine.create(function()
     if not M.ctx[bufnr] then
@@ -75,13 +75,6 @@ end
 ---@param bufnr number
 ---@param client vim.lsp.Client
 function M.setup(bufnr, client)
-  -- The server does support formatting but it is disabled by default
-  -- https://github.com/redhat-developer/yaml-language-server/issues/486
-  if require("schema-companion").config.formatting then
-    client.server_capabilities.documentFormattingProvider = true
-    client.server_capabilities.documentRangeFormattingProvider = true
-  end
-
   local state = {
     client = client,
     schema = schema.default_schema(),
@@ -95,8 +88,8 @@ end
 
 --- gets or sets the schema in its context and lsp
 ---@param bufnr number
----@param data Schema | Schema[] | nil
----@return Schema
+---@param data schema_companion.Schema | schema_companion.Schema[] | nil
+---@return schema_companion.Schema
 function M.schema(bufnr, data)
   if bufnr == 0 then
     bufnr = vim.api.nvim_get_current_buf()
@@ -118,7 +111,7 @@ function M.schema(bufnr, data)
     log.debug("file=%s schema=%s set new override", bufuri, data.uri)
 
     client.settings = vim.tbl_deep_extend("force", client.settings, { yaml = { schemas = override } })
-    client.workspace_did_change_configuration(client.settings)
+    client.request("workspace/didChangeConfiguration", client.settings)
   end
 
   return M.ctx[bufnr].schema
@@ -126,7 +119,7 @@ end
 
 --- Set the schema used for a buffer.
 ---@param bufnr number: Buffer number
----@param s Schema[] | Schema
+---@param s schema_companion.Schema[] | schema_companion.Schema
 function M.set_buffer_schema(bufnr, s)
   return M.schema(bufnr, s)
 end

@@ -4,7 +4,7 @@ local config = require("schema-companion").config
 local matchers = require("schema-companion.matchers")
 local lsp = require("schema-companion.lsp")
 
----@param schema Schema
+---@param schema schema_companion.Schema
 ---@return boolean
 local valid_schema = function(schema)
   if schema and schema.uri then
@@ -13,7 +13,7 @@ local valid_schema = function(schema)
   return false
 end
 
----@return Schema
+---@return schema_companion.Schema
 function M.default_schema()
   return {
     name = "none",
@@ -22,7 +22,7 @@ function M.default_schema()
 end
 
 --- User defined schemas
----@return Schema[]
+---@return schema_companion.Schema[]
 function M.from_options()
   local r = {}
   if config and config.schemas then
@@ -37,9 +37,9 @@ function M.from_options()
 end
 
 --- Matcher defined schemas
----@return Schema[]
+---@return schema_companion.Schema[]
 function M.from_matchers()
-  ---@type Schema[]
+  ---@type schema_companion.Schema[]
   local r = {}
   for _, matcher in ipairs(matchers.get()) do
     r = vim.list_extend(r, matcher.handles())
@@ -48,7 +48,7 @@ function M.from_matchers()
 end
 
 --- Matcher defined schemas
----@return Schema[]
+---@return schema_companion.Schema[]
 function M.from_store()
   local schemas = lsp.get_all_schemas(0)
   if schemas == nil or vim.tbl_count(schemas or {}) == 0 then
@@ -58,7 +58,7 @@ function M.from_store()
   return schemas
 end
 
----@return Schema[]
+---@return schema_companion.Schema[]
 function M.all()
   local r = {}
 
@@ -69,7 +69,7 @@ function M.all()
   return r
 end
 
----@return Schema | nil
+---@return schema_companion.Schema | nil
 ---@param bufnr number
 function M.current(bufnr)
   local schema = lsp.get_schema(bufnr)
@@ -81,7 +81,7 @@ function M.current(bufnr)
   return schema
 end
 
----@return Schema[] | nil
+---@return schema_companion.Schema[] | nil
 ---@param bufnr number
 function M.matching(bufnr)
   local schemas = lsp.get_schemas(bufnr)

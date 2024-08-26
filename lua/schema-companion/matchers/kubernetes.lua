@@ -8,6 +8,7 @@ M.config = {
   version = "master",
 }
 
+---@type schema_companion.MatcherSetupFn
 function M.setup(config)
   M.config = vim.tbl_deep_extend("force", {}, M.config, config)
 
@@ -45,6 +46,7 @@ local builtin_resource_regex = {
   [[^policy$]],
 }
 
+---@type schema_companion.MatcherMatchFn
 function M.match(bufnr)
   local resource = {}
 
@@ -112,4 +114,5 @@ function M.match(bufnr)
   }
 end
 
+---@type schema_companion.Matcher
 return M

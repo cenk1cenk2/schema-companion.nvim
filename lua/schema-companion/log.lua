@@ -21,7 +21,7 @@ local defaults = {
   float_precision = 0.01,
 }
 
----@class Logger
+---@class schema_companion.Logger
 local M = {}
 
 function M.new(config)

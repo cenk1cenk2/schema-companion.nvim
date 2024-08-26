@@ -29,7 +29,7 @@ end
 
 -- get all known schemas by the yamlls attached to {bufnr}
 ---@param bufnr number
----@return Schema | nil
+---@return schema_companion.Schema | nil
 function M.get_all_schemas(bufnr)
   local response = M.request_sync(bufnr, "yaml/get/all/jsonSchemas")
 
@@ -38,7 +38,7 @@ end
 
 -- Get matching schemas to current buffer.
 ---@param bufnr number
----@return Schema[] | nil
+---@return schema_companion.Schema[] | nil
 function M.get_schemas(bufnr)
   local response = M.request_sync(bufnr, "yaml/get/jsonSchema")
 
@@ -47,7 +47,7 @@ end
 
 -- get schema used for {bufnr} from the yamlls attached to it
 ---@param bufnr number
----@return Schema | nil
+---@return schema_companion.Schema | nil
 function M.get_schema(bufnr)
   local response = M.get_schemas(bufnr)
 
@@ -62,6 +62,11 @@ function M.store_initialized(_, _, req, _)
   require("schema-companion.context").initialized_client_ids[client_id] = true
 
   local client = vim.lsp.get_client_by_id(client_id)
+
+  if not client then
+    error(("LSP Client is not available anymore: %d"):format(client_id))
+  end
+
   local buffers = vim.lsp.get_buffers_by_client_id(client_id)
 
   for _, bufnr in ipairs(buffers) do

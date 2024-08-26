@@ -1,26 +1,32 @@
 ---@meta
 
----@class Schema
+error("Can not source metafile.")
+
+---@class schema_companion.Schema
 ---@field name? string
 ---@field uri string
 ---@field description? string
 
----@class Matcher
----@field match fun(bufnr: number): Schema | nil
----@field handles fun(): Schema[]
----@field health fun()
+---@class schema_companion.Matcher: table
+---@field match schema_companion.MatcherMatchFn
+---@field handles schema_companion.MatcherHandlesFn
+---@field health schema_companion.MatcherHealthFn
 ---@field name string
 ---@field config? table
----@field setup? fun(table): Matcher
+---@field setup? schema_companion.MatcherSetupFn
 
----@class ConfigOptions
+---@alias schema_companion.MatcherMatchFn fun(bufnr: number): schema_companion.Schema | nil
+---@alias schema_companion.MatcherHandlesFn fun(): schema_companion.Schema[]
+---@alias schema_companion.MatcherHealthFn fun()
+---@alias schema_companion.MatcherSetupFn fun(table?): schema_companion.Matcher
+
+---@class schema_companion.Config
 ---@field log_level "debug" | "trace" | "info" | "warn" | "error" | "fatal"
----@field formatting boolean
 ---@field enable_telescope boolean
----@field schemas Schema[]
----@field matchers Matcher[]
+---@field schemas schema_companion.Schema[]
+---@field matchers schema_companion.Matcher[]
 
----@class Logger
+---@class schema_companion.Logger
 ---@field trace fun(fmt: string, ...: any)
 ---@field debug fun(fmt: string, ...: any)
 ---@field info fun(fmt: string, ...: any)
