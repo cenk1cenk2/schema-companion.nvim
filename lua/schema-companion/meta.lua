@@ -4,7 +4,7 @@ error("Can not source metafile.")
 
 ---@class schema_companion.Schema
 ---@field name? string
----@field uri string
+---@field uri? string
 ---@field description? string
 
 ---@class schema_companion.Matcher: table

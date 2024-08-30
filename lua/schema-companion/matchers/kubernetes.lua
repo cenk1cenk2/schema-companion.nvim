@@ -1,6 +1,7 @@
 local M = {}
 
 local log = require("schema-companion.log")
+local utils = require("schema-companion.utils")
 
 M.name = "Kubernetes"
 
@@ -31,7 +32,7 @@ function M.change_version()
     default = M.get_version(),
   }, function(version)
     if not version then
-      log.warn("No version provided.")
+      log.warn("No version provided: matcher=%s", M.name)
     end
 
     M.set_version(version)
@@ -74,7 +75,8 @@ function M.match(bufnr)
   end
 
   log.debug(
-    "Kubernetes matcher matches: bufnr=%d group=%s version=%s kind=%s",
+    "matches: matcher=%s bufnr=%d group=%s version=%s kind=%s",
+    M.name,
     bufnr or "unknown",
     resource.group or "unknown",
     resource.version or "unknown",
@@ -87,31 +89,37 @@ function M.match(bufnr)
     local _, _, resource_group = resource.group:find([[^([^.]*)]])
 
     if resource.version then
-      return {
-        name = ("Kubernetes [%s] [%s@%s/%s]"):format(M.config.version, resource.kind, resource.group, resource.version),
-        uri = ("https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/%s-standalone-strict/%s-%s-%s.json"):format(
+      return utils.ensure_and_return(
+        ("https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/%s-standalone-strict/%s-%s-%s.json"):format(
           M.config.version,
           resource.kind:lower(),
           resource_group:lower(),
           resource.version:lower()
         ),
-      }
+        {
+          name = ("Kubernetes [%s] [%s@%s/%s]"):format(M.config.version, resource.kind, resource.group, resource.version),
+        }
+      )
     end
 
-    return {
-      name = ("Kubernetes [%s] [%s@%s]"):format(M.config.version, resource.kind, resource.group),
-      uri = ("https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/%s-standalone-strict/%s-%s.json"):format(
+    return utils.ensure_and_return(
+      ("https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/%s-standalone-strict/%s-%s.json"):format(
         M.config.version,
         resource.kind:lower(),
         resource_group:lower()
       ),
-    }
+      {
+        name = ("Kubernetes [%s] [%s@%s]"):format(M.config.version, resource.kind, resource.group),
+      }
+    )
   end
 
-  return {
-    name = ("Kubernetes [CRD] [%s@%s/%s]"):format(resource.kind, resource.group, resource.version),
-    uri = ("https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/%s/%s_%s.json"):format(resource.group:lower(), resource.kind:lower(), resource.version:lower()),
-  }
+  return utils.ensure_and_return(
+    ("https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/%s/%s_%s.json"):format(resource.group:lower(), resource.kind:lower(), resource.version:lower()),
+    {
+      name = ("Kubernetes [CRD] [%s@%s/%s]"):format(resource.kind, resource.group, resource.version),
+    }
+  )
 end
 
 ---@type schema_companion.Matcher

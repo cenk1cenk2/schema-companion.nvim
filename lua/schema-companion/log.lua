@@ -5,7 +5,7 @@
 -- under the terms of the MIT license. See LICENSE for details.
 
 local defaults = {
-  plugin = "yaml.nvim",
+  plugin = "schema-companion.nvim",
   use_console = true,
   highlights = true,
   use_file = false,
