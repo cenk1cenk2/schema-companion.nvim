@@ -2,7 +2,6 @@ local M = {}
 
 ---@type schema_companion.Config
 M.config = {
-  log_level = "info",
   enable_telescope = false,
   matchers = {},
   schemas = {},
@@ -14,7 +13,7 @@ M.config = {
 function M.setup(config)
   M.config = vim.tbl_deep_extend("force", M.config, config or {})
 
-  local log = require("schema-companion.log").new({ level = M.config.log_level })
+  local log = require("schema-companion.log").new()
 
   if M.config.enable_telescope then
     xpcall(function()

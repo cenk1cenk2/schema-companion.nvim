@@ -21,12 +21,13 @@ error("Can not source metafile.")
 ---@alias schema_companion.MatcherSetupFn fun(table?): schema_companion.Matcher
 
 ---@class schema_companion.Config
----@field log_level "debug" | "trace" | "info" | "warn" | "error" | "fatal"
 ---@field enable_telescope boolean
 ---@field schemas schema_companion.Schema[]
 ---@field matchers schema_companion.Matcher[]
 
 ---@class schema_companion.Logger
+---@field new schema_companion.LoggerNew
+---@field config schema_companion.LoggerConfig
 ---@field trace fun(fmt: string, ...: any)
 ---@field debug fun(fmt: string, ...: any)
 ---@field info fun(fmt: string, ...: any)

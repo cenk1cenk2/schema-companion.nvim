@@ -46,7 +46,6 @@ The default plugin configuration for the setup function is as below.
 
 ```lua
 require("schema-companion").setup({
-  log_level = "info",
   enable_telescope = false,
   matchers = {},
   schemas = {},
