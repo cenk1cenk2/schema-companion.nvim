@@ -12,7 +12,6 @@
 ---@field info fun(fmt: string, ...: any)
 ---@field warn fun(fmt: string, ...: any)
 ---@field error fun(fmt: string, ...: any)
----@field fatal fun(fmt: string, ...: any)
 
 ---@class schema_companion.Logger
 local M = {}
