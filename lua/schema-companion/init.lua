@@ -13,7 +13,7 @@ M.config = {
 function M.setup(config)
   M.config = vim.tbl_deep_extend("force", M.config, config or {})
 
-  local log = require("schema-companion.log").new()
+  local log = require("schema-companion.log").setup()
 
   if M.config.enable_telescope then
     xpcall(function()

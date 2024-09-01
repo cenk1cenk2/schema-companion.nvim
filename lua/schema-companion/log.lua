@@ -5,7 +5,7 @@
 -- under the terms of the MIT license. See LICENSE for details.
 
 ---@class schema_companion.Logger
----@field new schema_companion.LoggerNew
+---@field setup schema_companion.LoggerSetupFn
 ---@field config schema_companion.LoggerConfig
 ---@field trace fun(fmt: string, ...: any)
 ---@field debug fun(fmt: string, ...: any)
@@ -33,10 +33,10 @@ M.config = {
   },
 }
 
----@alias schema_companion.LoggerNew fun(): schema_companion.Logger
+---@alias schema_companion.LoggerSetupFn fun(): schema_companion.Logger
 
----@type schema_companion.LoggerNew
-function M.new()
+---@type schema_companion.LoggerSetupFn
+function M.setup()
   local log = function(mode, sprintf, ...)
     local info = debug.getinfo(2, "Sl")
     local lineinfo = ("%s:%s"):format(info.short_src, info.currentline)
