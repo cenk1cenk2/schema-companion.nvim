@@ -5,6 +5,16 @@
 -- under the terms of the MIT license. See LICENSE for details.
 
 ---@class schema_companion.Logger
+---@field new schema_companion.LoggerNew
+---@field config schema_companion.LoggerConfig
+---@field trace fun(fmt: string, ...: any)
+---@field debug fun(fmt: string, ...: any)
+---@field info fun(fmt: string, ...: any)
+---@field warn fun(fmt: string, ...: any)
+---@field error fun(fmt: string, ...: any)
+---@field fatal fun(fmt: string, ...: any)
+
+---@class schema_companion.Logger
 local M = {}
 
 ---@class schema_companion.LoggerConfig
