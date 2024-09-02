@@ -4,24 +4,33 @@
 -- This library is free software; you can redistribute it and/or modify it
 -- under the terms of the MIT license. See LICENSE for details.
 
----@class schema_companion.Logger
+---@class schema_companion.Logger: schema_companion.LogAtLevel
 ---@field setup schema_companion.LoggerSetupFn
 ---@field config schema_companion.LoggerConfig
----@field trace fun(fmt: string, ...: any)
----@field debug fun(fmt: string, ...: any)
----@field info fun(fmt: string, ...: any)
----@field warn fun(fmt: string, ...: any)
----@field error fun(fmt: string, ...: any)
+---@field print schema_companion.LogAtLevel
+
+---@class schema_companion.LogAtLevel
+---@field trace fun(...: any): string
+---@field debug fun(...: any): string
+---@field info fun(...: any): string
+---@field warn fun(...: any): string
+---@field error fun(...: any): string
 
 ---@class schema_companion.Logger
-local M = {}
+local M = {
+  ---@diagnostic disable-next-line: missing-fields
+  print = {},
+}
 
 ---@class schema_companion.LoggerConfig
 ---@field plugin string
 ---@field modes schema_companion.LoggerMode[]
+
 ---@class schema_companion.LoggerMode
 ---@field name string
 ---@field level number
+
+---@type schema_companion.LoggerConfig
 M.config = {
   plugin = "schema-companion.nvim",
   modes = {
@@ -49,6 +58,7 @@ function M.setup()
   end
 
   for _, mode in pairs(M.config.modes) do
+    ---@diagnostic disable-next-line: assign-type-mismatch
     M[mode.name] = function(...)
       return log(mode, function(...)
         local passed = { ... }
@@ -59,7 +69,17 @@ function M.setup()
           table.insert(inspected, vim.inspect(v))
         end
 
-        return string.format(fmt, unpack(inspected))
+        return fmt:format(unpack(inspected))
+      end, ...)
+    end
+
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    M.print[mode.name] = function(...)
+      return log(mode, function(...)
+        local passed = { ... }
+        local fmt = table.remove(passed, 1)
+
+        return fmt
       end, ...)
     end
   end
