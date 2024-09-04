@@ -111,7 +111,7 @@ function M.schema(bufnr, data)
     log.debug("set new override: file=%s schema=%s", bufuri, data.uri)
 
     client.settings = vim.tbl_deep_extend("force", client.settings, { yaml = { schemas = override } })
-    client.request("workspace/didChangeConfiguration", client.settings)
+    client.request("workspace/didChangeConfiguration", { settings = client.settings })
   end
 
   return M.ctx[bufnr].schema
