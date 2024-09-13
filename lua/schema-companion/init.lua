@@ -1,33 +1,23 @@
 local M = {}
 
----@type schema_companion.Config
-M.config = {
-  enable_telescope = false,
-  matchers = {},
-  schemas = {},
-}
-
 --- Configures the schema-companion plugin.
 ---@param config schema_companion.Config
----@return schema_companion.Config
 function M.setup(config)
-  M.config = vim.tbl_deep_extend("force", M.config, config or {})
+  local c = require("schema-companion.setup").setup(config)
 
-  local log = require("schema-companion.log").setup()
+  local log = require("schema-companion.log").setup({ level = c.log_level })
 
-  if M.config.enable_telescope then
+  if c.enable_telescope then
     xpcall(function()
       return require("telescope").load_extension("yaml_schema")
     end, debug.traceback)
   end
 
-  log.debug("schema-companion has been setup: %s", M.config)
+  log.debug("Plugin has been setup: %s", c)
 
-  for _, matcher in ipairs(M.config.matchers) do
+  for _, matcher in ipairs(c.matchers) do
     require("schema-companion.matchers").register(matcher)
   end
-
-  return M.config
 end
 
 --- Configures a LSP client with the schema-companion handlers.

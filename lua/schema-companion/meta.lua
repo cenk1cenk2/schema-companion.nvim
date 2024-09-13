@@ -21,6 +21,7 @@ error("Can not source metafile.")
 ---@alias schema_companion.MatcherSetupFn fun(table?): schema_companion.Matcher
 
 ---@class schema_companion.Config
----@field enable_telescope boolean
+---@field log_level? number
+---@field enable_telescope? boolean
 ---@field schemas schema_companion.Schema[]
 ---@field matchers schema_companion.Matcher[]

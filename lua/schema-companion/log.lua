@@ -7,7 +7,7 @@
 ---@class schema_companion.Logger: schema_companion.LogAtLevel
 ---@field setup schema_companion.LoggerSetupFn
 ---@field config schema_companion.LoggerConfig
----@field print schema_companion.LogAtLevel
+---@field p schema_companion.LogAtLevel
 
 ---@class schema_companion.LogAtLevel
 ---@field trace fun(...: any): string
@@ -19,10 +19,11 @@
 ---@class schema_companion.Logger
 local M = {
   ---@diagnostic disable-next-line: missing-fields
-  print = {},
+  p = {},
 }
 
 ---@class schema_companion.LoggerConfig
+---@field level number
 ---@field plugin string
 ---@field modes schema_companion.LoggerMode[]
 
@@ -32,6 +33,7 @@ local M = {
 
 ---@type schema_companion.LoggerConfig
 M.config = {
+  level = vim.log.levels.INFO,
   plugin = "schema-companion.nvim",
   modes = {
     { name = "trace", level = vim.log.levels.TRACE },
@@ -42,15 +44,21 @@ M.config = {
   },
 }
 
----@alias schema_companion.LoggerSetupFn fun(): schema_companion.Logger
+---@class schema_companion.LoggerSetup
+---@field level? number
+
+---@alias schema_companion.LoggerSetupFn fun(config?: schema_companion.LoggerSetup): schema_companion.Logger
 
 ---@type schema_companion.LoggerSetupFn
-function M.setup()
-  local log = function(mode, sprintf, ...)
-    local info = debug.getinfo(2, "Sl")
-    local lineinfo = ("%s:%s"):format(info.short_src, info.currentline)
+function M.setup(config)
+  M.config = vim.tbl_deep_extend("force", M.config, config or {})
 
-    local console = string.format("[%-5s] [%s]: %s", mode.name:upper(), lineinfo, sprintf(...))
+  local log = function(mode, sprintf, ...)
+    if mode.level < M.config.level then
+      return
+    end
+
+    local console = string.format("[%-5s]: %s", mode.name:upper(), sprintf(...))
 
     for _, line in ipairs(vim.split(console, "\n")) do
       vim.notify(([[[%s] %s]]):format(M.config.plugin, line), mode.level)
@@ -74,7 +82,7 @@ function M.setup()
     end
 
     ---@diagnostic disable-next-line: assign-type-mismatch
-    M.print[mode.name] = function(...)
+    M.p[mode.name] = function(...)
       return log(mode, function(...)
         local passed = { ... }
         local fmt = table.remove(passed, 1)
@@ -85,6 +93,12 @@ function M.setup()
   end
 
   return M
+end
+
+function M.set_log_level(level)
+  M.config.level = level
+
+  return level
 end
 
 return M

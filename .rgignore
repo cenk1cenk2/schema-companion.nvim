@@ -1,1 +1,7 @@
 *_spec.lua
+README.md
+LICENSE
+Taskfile.yml
+.gitignore
+.gitattributes
+.stylua.toml
