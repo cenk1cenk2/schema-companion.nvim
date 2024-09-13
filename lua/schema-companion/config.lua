@@ -1,5 +1,11 @@
 local M = {}
 
+---@class schema_companion.Config
+---@field log_level? number
+---@field enable_telescope? boolean
+---@field schemas schema_companion.Schema[]
+---@field matchers schema_companion.Matcher[]
+
 ---@type schema_companion.Config
 local defaults = {
   log_level = vim.log.levels.INFO,

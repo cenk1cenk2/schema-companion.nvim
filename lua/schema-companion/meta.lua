@@ -19,9 +19,3 @@ error("Can not source metafile.")
 ---@alias schema_companion.MatcherHandlesFn fun(): schema_companion.Schema[]
 ---@alias schema_companion.MatcherHealthFn fun()
 ---@alias schema_companion.MatcherSetupFn fun(table?): schema_companion.Matcher
-
----@class schema_companion.Config
----@field log_level? number
----@field enable_telescope? boolean
----@field schemas schema_companion.Schema[]
----@field matchers schema_companion.Matcher[]
