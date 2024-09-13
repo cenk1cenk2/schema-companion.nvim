@@ -95,10 +95,10 @@ function M.setup(config)
   return M
 end
 
+--- Sets the log level of the logger.
+---@param level integer
 function M.set_log_level(level)
   M.config.level = level
-
-  return level
 end
 
 return M
