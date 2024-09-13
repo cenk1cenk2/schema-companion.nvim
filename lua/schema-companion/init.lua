@@ -13,11 +13,11 @@ function M.setup(config)
     end, debug.traceback)
   end
 
-  log.debug("Plugin has been setup: %s", c)
-
   for _, matcher in ipairs(c.matchers) do
     require("schema-companion.matchers").register(matcher)
   end
+
+  log.debug("Plugin has been setup: %s", c)
 end
 
 --- Configures a LSP client with the schema-companion handlers.
