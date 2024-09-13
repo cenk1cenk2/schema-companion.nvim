@@ -1,6 +1,6 @@
 local M = {}
 
-local setup = require("schema-companion.setup")
+local config = require("schema-companion.config")
 local matchers = require("schema-companion.matchers")
 local lsp = require("schema-companion.lsp")
 
@@ -25,8 +25,8 @@ end
 ---@return schema_companion.Schema[]
 function M.from_options()
   local r = {}
-  if setup.config and setup.config.schemas then
-    for _, schema in ipairs(setup.config.schemas) do
+  if config.options and config.options.schemas then
+    for _, schema in ipairs(config.options.schemas) do
       if valid_schema(schema) then
         table.insert(r, schema)
       end

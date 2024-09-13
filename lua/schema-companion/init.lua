@@ -3,7 +3,7 @@ local M = {}
 --- Configures the schema-companion plugin.
 ---@param config schema_companion.Config
 function M.setup(config)
-  local c = require("schema-companion.setup").setup(config)
+  local c = require("schema-companion.config").setup(config)
 
   local log = require("schema-companion.log").setup({ level = c.log_level })
 
