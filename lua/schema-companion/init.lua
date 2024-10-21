@@ -5,7 +5,7 @@ local M = {}
 function M.setup(config)
   local c = require("schema-companion.config").setup(config)
 
-  local log = require("schema-companion.log").setup({ level = c.log_level })
+  require("schema-companion.log").setup({ level = c.log_level })
 
   if c.enable_telescope then
     xpcall(function()
@@ -16,8 +16,6 @@ function M.setup(config)
   for _, matcher in ipairs(c.matchers) do
     require("schema-companion.matchers").register(matcher)
   end
-
-  log.debug("Plugin has been setup: %s", c)
 end
 
 --- Configures a LSP client with the schema-companion handlers.
