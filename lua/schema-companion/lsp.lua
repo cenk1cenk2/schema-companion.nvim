@@ -16,9 +16,9 @@ function M.request_sync(bufnr, method)
     local response, error = client.request_sync(method, { vim.uri_from_bufnr(bufnr) }, sync_timeout, bufnr)
 
     if error then
-      log.error("Failed LSP request: method=%s client=%s bufnr=%d error=%s", client.name, bufnr, error)
+      log.debug("Failed LSP request: method=%s client=%s bufnr=%d error=%s", client.name, bufnr, error)
     elseif response and response.err then
-      log.error("Failed LSP request: method=%s client=%s bufnr=%d error=%s", method, client.name, bufnr, response.err)
+      log.debug("Failed LSP request: method=%s client=%s bufnr=%d error=%s", method, client.name, bufnr, response.err)
     elseif response and response.result then
       vim.list_extend(result, response.result)
     end
