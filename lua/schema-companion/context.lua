@@ -36,7 +36,12 @@ function M.discover(bufnr, client)
   end))
 end
 
+--- Matches a schema to the given buffer.
+---@param bufnr number?
+---@return schema_companion.Schema | nil
 function M.match(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+
   local current_schema = schema.current(bufnr)
 
   if current_schema and current_schema.name and current_schema.uri ~= schema.default_schema().uri then
