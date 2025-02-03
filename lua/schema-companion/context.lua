@@ -30,46 +30,52 @@ function M.discover(bufnr, client)
 
     M.ctx[bufnr].executed = true
 
-    local current_schema = schema.current(bufnr)
+    log.debug("bufnr=%d client_id=%d running autodiscover", bufnr, client.id)
+    M.match(bufnr)
+    log.debug("bufnr=%d client_id=%d autodiscover settled", bufnr, client.id)
+  end))
+end
 
-    if current_schema and current_schema.name and current_schema.uri ~= schema.default_schema().uri then
-      -- if LSP returns a name that means it came from SchemaStore
-      -- and we can use it right away
-      M.ctx[bufnr].schema = current_schema
-      log.debug("bufnr=%d client_id=%d schema=%s an SchemaStore defined schema matched this file", bufnr, client.id, current_schema.name or current_schema.uri)
+function M.match(bufnr)
+  local current_schema = schema.current(bufnr)
+
+  if current_schema and current_schema.name and current_schema.uri ~= schema.default_schema().uri then
+    -- if LSP returns a name that means it came from SchemaStore
+    -- and we can use it right away
+    M.ctx[bufnr].schema = current_schema
+    log.debug("bufnr=%d schema=%s an SchemaStore defined schema matched this file", bufnr, current_schema.name or current_schema.uri)
+
+    return M.ctx[bufnr].schema
+  end
+
+  -- if it returned something without a name it means it came from our own
+  -- internal schema table and we have to loop through it to get the name
+  for _, option_schema in ipairs(schema.from_options()) do
+    if current_schema and option_schema.uri == current_schema.uri then
+      M.ctx[bufnr].schema = option_schema
+      log.debug("bufnr=%d schema=%s an user defined schema matched this file", bufnr, option_schema.name)
 
       return M.ctx[bufnr].schema
-    else
-      -- if it returned something without a name it means it came from our own
-      -- internal schema table and we have to loop through it to get the name
-      for _, option_schema in ipairs(schema.from_options()) do
-        if current_schema and option_schema.uri == current_schema.uri then
-          M.ctx[bufnr].schema = option_schema
-          log.debug("bufnr=%d client_id=%d schema=%s an user defined schema matched this file", bufnr, client.id, option_schema.name)
+    end
+  end
 
-          return M.ctx[bufnr].schema
-        end
-      end
+  log.debug("bufnr=%d no user defined schema matched this file", bufnr)
 
-      log.debug("bufnr=%d client_id=%d no user defined schema matched this file", bufnr, client.id)
+  -- if LSP is not using any schema, use registered matchers
+  for _, matcher in ipairs(matchers.get()) do
+    local result = matcher.match(bufnr)
+    if result then
+      M.schema(bufnr, result)
+      log.debug("bufnr=%d schema=%s a registered matcher matched this file", bufnr, result.name)
+
+      return M.ctx[bufnr].schema
     end
 
-    -- if LSP is not using any schema, use registered matchers
-    for _, matcher in ipairs(matchers.get()) do
-      local result = matcher.match(bufnr)
-      if result then
-        M.schema(bufnr, result)
-        log.debug("bufnr=%d client_id=%d schema=%s a registered matcher matched this file", bufnr, client.id, result.name)
+    log.debug("bufnr=%d no registered matcher matched this file", bufnr)
+  end
 
-        return M.ctx[bufnr].schema
-      end
-
-      log.debug("bufnr=%d client_id=%d no registered matcher matched this file", bufnr, client.id)
-    end
-
-    -- No schema matched
-    log.debug("bufnr=%d client_id=%d no registered schema matches", bufnr, client.id)
-  end))
+  -- No schema matched
+  log.debug("bufnr=%d no registered schema matches", bufnr)
 end
 
 ---@param bufnr number
@@ -120,16 +126,16 @@ function M.schema(bufnr, data)
 end
 
 --- Set the schema used for a buffer.
----@param bufnr number: Buffer number
+---@param bufnr? number: Buffer number
 ---@param s schema_companion.Schema[] | schema_companion.Schema
 function M.set_buffer_schema(bufnr, s)
-  return M.schema(bufnr, s)
+  return M.schema(bufnr or vim.api.nvim_get_current_buf(), s)
 end
 
 --- Get the schema used for a buffer.
----@param bufnr number: Buffer number
+---@param bufnr number?: Buffer number
 function M.get_buffer_schema(bufnr)
-  return M.schema(bufnr)
+  return M.schema(bufnr or vim.api.nvim_get_current_buf())
 end
 
 return M

@@ -104,7 +104,7 @@ require("telescope").extensions.yaml_schema.select_from_matching_schemas()
 ### Current Schema
 
 ```lua
-local schema = require("schema-companion").get_buf_schema(vim.api.nvim_get_current_buf())
+local schema = require("schema-companion").get_buffer_schema()
 ```
 
 This can be further utilized in `lualine` as follows.
@@ -116,7 +116,7 @@ require("lualine").setup({
     lualine_c = {
       {
         function()
-          return ("%s"):format(require("schema-companion.context").get_buffer_schema(0).name)
+          return ("%s"):format(require("schema-companion.context").get_buffer_schema().name)
         end,
         cond = function()
           return package.loaded["schema-companion"]
@@ -125,4 +125,12 @@ require("lualine").setup({
     },
   },
 })
+```
+
+### Rematch for Buffer
+
+In some cases you want to create your yaml file from scratch, instead of reloading the buffer you can also trigger match process again.
+
+```lua
+require("schema-companion.context").match()
 ```
