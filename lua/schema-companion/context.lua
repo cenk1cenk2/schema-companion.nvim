@@ -30,9 +30,8 @@ function M.discover(bufnr, client)
 
     M.ctx[bufnr].executed = true
 
-    log.debug("bufnr=%d client_id=%d running autodiscover", bufnr, client.id)
-    M.match(bufnr)
-    log.debug("bufnr=%d client_id=%d autodiscover settled", bufnr, client.id)
+    local s = M.match(bufnr)
+    log.debug("bufnr=%d client_id=%d autodiscover settled: %s", bufnr, client.id, s)
   end))
 end
 
@@ -57,8 +56,8 @@ function M.match(bufnr)
   -- internal schema table and we have to loop through it to get the name
   for _, option_schema in ipairs(schema.from_options()) do
     if current_schema and option_schema.uri == current_schema.uri then
-      M.ctx[bufnr].schema = option_schema
       log.debug("bufnr=%d schema=%s an user defined schema matched this file", bufnr, option_schema.name)
+      M.schema(bufnr, option_schema)
 
       return M.ctx[bufnr].schema
     end
@@ -70,8 +69,8 @@ function M.match(bufnr)
   for _, matcher in ipairs(matchers.get()) do
     local result = matcher.match(bufnr)
     if result then
-      M.schema(bufnr, result)
       log.debug("bufnr=%d schema=%s a registered matcher matched this file", bufnr, result.name)
+      M.schema(bufnr, result)
 
       return M.ctx[bufnr].schema
     end
@@ -81,20 +80,6 @@ function M.match(bufnr)
 
   -- No schema matched
   log.debug("bufnr=%d no registered schema matches", bufnr)
-end
-
----@param bufnr number
----@param client vim.lsp.Client
-function M.setup(bufnr, client)
-  local state = {
-    client = client,
-    schema = schema.default_schema(),
-    executed = false,
-  }
-
-  M.ctx[bufnr] = state
-
-  M.discover(bufnr, client)
 end
 
 --- gets or sets the schema in its context and lsp
@@ -117,6 +102,14 @@ function M.schema(bufnr, data)
     local client = M.ctx[bufnr].client
 
     local override = {}
+
+    for u, b in pairs(client.settings.yaml.schemas) do
+      if b == bufuri then
+        override[u] = false
+        log.debug("removed override: file=%s schema=%s", b, u)
+      end
+    end
+
     override[data.uri] = bufuri
 
     log.debug("set new override: file=%s schema=%s", bufuri, data.uri)
@@ -141,6 +134,20 @@ end
 ---@param bufnr number?: Buffer number
 function M.get_buffer_schema(bufnr)
   return M.schema(bufnr or vim.api.nvim_get_current_buf())
+end
+
+---@param bufnr number
+---@param client vim.lsp.Client
+function M.setup(bufnr, client)
+  local state = {
+    client = client,
+    schema = schema.default_schema(),
+    executed = false,
+  }
+
+  M.ctx[bufnr] = state
+
+  M.discover(bufnr, client)
 end
 
 return M
