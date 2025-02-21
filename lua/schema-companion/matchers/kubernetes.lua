@@ -47,6 +47,10 @@ local builtin_resource_regex = {
   [[^policy$]],
 }
 
+local not_builtin_api_groups = {
+    "gateway.networking.k8s.io"
+}
+
 ---@type schema_companion.MatcherMatchFn
 function M.match(bufnr)
   local resource = {}
@@ -83,9 +87,14 @@ function M.match(bufnr)
     resource.kind or "unknown"
   )
 
-  if not resource.version or #vim.tbl_filter(function(regex)
-    return resource.group:match(regex)
-  end, builtin_resource_regex) > 0 then
+  local is_builtin = false;
+  if not vim.tbl_contains(not_builtin_api_groups, resource.group, nil) then
+    is_builtin = (not resource.version or #vim.tbl_filter(function(regex)
+      return resource.group:match(regex)
+    end, builtin_resource_regex) > 0)
+  end
+
+  if is_builtin then
     local _, _, resource_group = resource.group:find([[^([^.]*)]])
 
     if resource.version then
