@@ -103,7 +103,9 @@ function M.schema(bufnr, data)
 
     local override = {}
 
-    for u, b in pairs(client.settings.yaml.schemas) do
+    local schemas = client.settings.yaml.schemas or {}
+
+    for u, b in pairs(schemas) do
       if b == bufuri then
         override[u] = false
         log.debug("removed override: file=%s schema=%s", b, u)
