@@ -4,7 +4,7 @@ local log = require("schema-companion.log")
 
 local sync_timeout = 5000
 
----@param bufnr number
+---@param bufnr integer
 ---@param method string
 ---@return table | nil
 function M.request_sync(bufnr, method)
@@ -12,8 +12,9 @@ function M.request_sync(bufnr, method)
 
   local result = {}
 
+  ---@type client vim.lsp.Client
   for _, client in pairs(clients) do
-    local response, error = client.request_sync(method, { vim.uri_from_bufnr(bufnr) }, sync_timeout, bufnr)
+    local response, error = client:request_sync(method, { vim.uri_from_bufnr(bufnr) }, sync_timeout, bufnr)
 
     if error then
       log.debug("Failed LSP request: method=%s client=%s bufnr=%d error=%s", client.name, bufnr, error)
@@ -28,7 +29,7 @@ function M.request_sync(bufnr, method)
 end
 
 -- get all known schemas by the yamlls attached to {bufnr}
----@param bufnr number
+---@param bufnr integer
 ---@return schema_companion.Schema | nil
 function M.get_all_schemas(bufnr)
   local response = M.request_sync(bufnr, "yaml/get/all/jsonSchemas")
@@ -37,7 +38,7 @@ function M.get_all_schemas(bufnr)
 end
 
 -- Get matching schemas to current buffer.
----@param bufnr number
+---@param bufnr integer
 ---@return schema_companion.Schema[] | nil
 function M.get_schemas(bufnr)
   local response = M.request_sync(bufnr, "yaml/get/jsonSchema")
@@ -46,7 +47,7 @@ function M.get_schemas(bufnr)
 end
 
 -- get schema used for {bufnr} from the yamlls attached to it
----@param bufnr number
+---@param bufnr integer
 ---@return schema_companion.Schema | nil
 function M.get_schema(bufnr)
   local response = M.get_schemas(bufnr)
