@@ -19,7 +19,7 @@ function M.setup(config)
 end
 
 --- Configures a LSP client with the schema-companion handlers.
----@param config any
+---@param config vim.lsp.ClientConfig
 ---@returns any
 function M.setup_client(config)
   -- taken from require("lspconfig.util").add_hook_after to drop dependency
@@ -34,21 +34,27 @@ function M.setup_client(config)
     end
   end
 
-  return vim.tbl_deep_extend("force", {}, config, {
-    on_attach = add_hook_after(config.on_attach, function(client, bufnr)
-      require("schema-companion.context").setup(bufnr, client)
-    end),
+  return vim.tbl_deep_extend(
+    "force",
+    {},
+    config,
+    ---@type vim.lsp.ClientConfig
+    {
+      on_attach = add_hook_after(config.on_attach, function(client, bufnr)
+        require("schema-companion.context").setup(bufnr, client)
+      end),
 
-    on_init = add_hook_after(config.on_init, function(client)
-      client.notify("yaml/supportSchemaSelection", { {} })
+      on_init = add_hook_after(config.on_init, function(client)
+        client:notify("yaml/supportSchemaSelection", { {} })
 
-      return true
-    end),
+        return true
+      end),
 
-    handlers = vim.tbl_extend("force", config.handlers or {}, {
-      ["yaml/schema/store/initialized"] = require("schema-companion.lsp").store_initialized,
-    }),
-  })
+      handlers = vim.tbl_extend("force", config.handlers or {}, {
+        ["yaml/schema/store/initialized"] = require("schema-companion.lsp").store_initialized,
+      }),
+    }
+  )
 end
 
 return M
