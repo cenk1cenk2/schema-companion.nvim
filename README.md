@@ -50,8 +50,7 @@ require("schema-companion").setup({
   enable_telescope = false,
   matchers = {},
   schemas = {},
-}
-
+})
 ```
 
 ### Language Server Configuration
