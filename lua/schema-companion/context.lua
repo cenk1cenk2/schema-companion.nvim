@@ -103,7 +103,10 @@ function M.schema(bufnr, data)
 
     local override = {}
 
-    local schemas = client.settings.yaml.schemas or {}
+    local schemas = {}
+    if client.settings and client.settings.yaml and client.settings.yaml.schemas then
+      schemas = client.settings.yaml.schemas
+    end
 
     for u, b in pairs(schemas) do
       if b == bufuri then
