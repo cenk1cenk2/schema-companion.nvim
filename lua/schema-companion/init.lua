@@ -19,9 +19,11 @@ function M.setup(config)
 end
 
 --- Configures a LSP client with the schema-companion handlers.
----@param config vim.lsp.ClientConfig
+---@param config? vim.lsp.ClientConfig
 ---@returns any
 function M.setup_client(config)
+  config = config or {}
+
   -- taken from require("lspconfig.util").add_hook_after to drop dependency
   local add_hook_after = function(func, new_fn)
     if func then
