@@ -34,12 +34,23 @@ function M.setup_client(config)
     end
   end
 
+  -- create capabilities while integrating user-provided capabilities
+  local capabilities = vim.tbl_deep_extend("force", vim.lsp.protocol.make_client_capabilities(), config.capabilities or {}, {
+    workspace = {
+      didChangeConfiguration = {
+        dynamicRegistration = true,
+      },
+    },
+  })
+
   return vim.tbl_deep_extend(
     "force",
     {},
     config,
     ---@type vim.lsp.ClientConfig
     {
+      capabilities = capabilities,
+
       on_attach = add_hook_after(config.on_attach, function(client, bufnr)
         require("schema-companion.context").setup(bufnr, client)
       end),
