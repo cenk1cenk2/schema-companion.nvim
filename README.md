@@ -91,13 +91,13 @@ Adding custom matchers are as easy as defining a function that detects and handl
 You can map the `telescope` picker to any keybinding of your choice.
 
 ```lua
-require("telescope").extensions.yaml_schema.select_schema()
+require("telescope").extensions.schema_companion.select_schema()
 ```
 
 If there are multiple matches for the buffer, you can select the schema manually from the ones that matches.
 
 ```lua
-require("telescope").extensions.yaml_schema.select_from_matching_schemas()
+require("telescope").extensions.schema_companion.select_from_matching_schemas()
 ```
 
 ### Current Schema

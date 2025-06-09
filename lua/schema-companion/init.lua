@@ -9,7 +9,7 @@ function M.setup(config)
 
   if c.enable_telescope then
     xpcall(function()
-      return require("telescope").load_extension("yaml_schema")
+      return require("telescope").load_extension("schema_companion")
     end, debug.traceback)
   end
 
