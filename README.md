@@ -57,6 +57,17 @@ require("schema-companion").setup({
 
 You can automatically extend your configuration of the `yaml-language-server` or `helm-ls` with the following configuration.
 
+#### Lsp Overlay Method
+
+```lua
+-- your LSP file: ./after/lsp/yamlls.lua
+return require("schema-companion").setup_client({
+  -- your yaml language server configuration
+})
+```
+
+#### LSP Config Method
+
 ```lua
 require("lspconfig").yamlls.setup(require("schema-companion").setup_client({
   -- your yaml language server configuration
@@ -103,7 +114,7 @@ require("telescope").extensions.schema_companion.select_from_matching_schemas()
 ### Current Schema
 
 ```lua
-local schema = require("schema-companion").get_buffer_schema()
+local schema = require("schema-companion.context").get_buffer_schema()
 ```
 
 This can be further utilized in `lualine` as follows.
