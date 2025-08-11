@@ -24,6 +24,7 @@ return {
     { "nvim-telescope/telescope.nvim" },
   },
   config = function()
+    -- PLEASE FOLLOW THE CONFIGURATION INSTRUCTIONS BELOW SINCE THERE IS AN ADDITIONAL STEP NEEDED FOR EACH LANGUAGE SERVER
     require("schema-companion").setup({
       -- if you have telescope you can register the extension
       enable_telescope = true,
@@ -39,6 +40,8 @@ return {
 ## Configuration
 
 Plugin has to be configured once, and the language servers can be added by extending the LSP configuration.
+
+**If you do not configure the language server with the `setup_client` function, the plugin will not work for the given language server.**
 
 ### Setup
 
