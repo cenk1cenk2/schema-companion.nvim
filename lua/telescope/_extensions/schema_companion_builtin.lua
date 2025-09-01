@@ -28,7 +28,7 @@ local build_select_picker = function(title, results, bufnr, opts)
 
           local selection = action_state.get_selected_entry()
 
-          require("schema-companion.context").schema(bufnr, {
+          require("schema-companion.context").set_ctx_schemas(bufnr, selection.value.client_id, {
             name = selection.value.name or selection.value.uri,
             uri = selection.value.uri,
           })
@@ -41,7 +41,7 @@ end
 
 function M.select_schema(opts)
   local bufnr = vim.api.nvim_get_current_buf()
-  local results = require("schema-companion.schema").all()
+  local results = require("schema-companion.schema").get_schemas(bufnr)
 
   if #results == 0 then
     return
@@ -52,7 +52,7 @@ end
 
 function M.select_from_matching_schemas(opts)
   local bufnr = vim.api.nvim_get_current_buf()
-  local results = require("schema-companion.schema").matching(bufnr)
+  local results = require("schema-companion.schema").get_matching_schemas(bufnr)
 
   if not results then
     return

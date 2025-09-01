@@ -1,4 +1,7 @@
+---@class schema_companion.Matcher
 local M = {}
+
+-- TODO: REFACTOR ME AFTER
 
 local log = require("schema-companion.log")
 local utils = require("schema-companion.utils")
@@ -9,7 +12,6 @@ M.config = {
   version = "master",
 }
 
----@type schema_companion.MatcherSetupFn
 function M.setup(config)
   M.config = vim.tbl_deep_extend("force", {}, M.config, config)
 
@@ -32,7 +34,7 @@ function M.change_version()
     default = M.get_version(),
   }, function(version)
     if not version then
-      log.warn("No version provided: matcher=%s", M.name)
+      log.warn("no version provided: matcher=%s", M.name)
     end
 
     M.set_version(version)
@@ -47,33 +49,11 @@ local builtin_resource_regex = {
   [[^policy$]],
 }
 
-local not_builtin_api_groups = {
-    "gateway.networking.k8s.io"
+local builtin_ignore_resource = {
+  "gateway.networking.k8s.io",
 }
 
----@type schema_companion.MatcherMatchFn
-function M.match(bufnr)
-  local resource = {}
-
-  for _, line in pairs(vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)) do
-    local _, _, group, version = line:find([[^apiVersion:%s*["']?([^%s"'/]*)/?([^%s"']*)]])
-    local _, _, kind = line:find([[^kind:%s*["']?([^%s"'/]*)]])
-
-    if group and group ~= "" then
-      resource.group = group
-    end
-    if version and version ~= "" then
-      resource.version = version
-    end
-    if kind and kind ~= "" then
-      resource.kind = kind
-    end
-
-    if resource.group and resource.kind then
-      break
-    end
-  end
-
+local match_resource = function(bufnr, resource)
   if not resource.kind or not resource.group then
     return nil
   end
@@ -87,8 +67,8 @@ function M.match(bufnr)
     resource.kind or "unknown"
   )
 
-  local is_builtin = false;
-  if not vim.tbl_contains(not_builtin_api_groups, resource.group, nil) then
+  local is_builtin = false
+  if not vim.tbl_contains(builtin_ignore_resource, resource.group, nil) then
     is_builtin = (not resource.version or #vim.tbl_filter(function(regex)
       return resource.group:match(regex)
     end, builtin_resource_regex) > 0)
@@ -98,38 +78,78 @@ function M.match(bufnr)
     local _, _, resource_group = resource.group:find([[^([^.]*)]])
 
     if resource.version then
-      return utils.ensure_and_return(
-        ("https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/%s-standalone-strict/%s-%s-%s.json"):format(
-          M.config.version,
-          resource.kind:lower(),
-          resource_group:lower(),
-          resource.version:lower()
+      return {
+        utils.ensure_and_return(
+          ("https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/%s-standalone-strict/%s-%s-%s.json"):format(
+            M.config.version,
+            resource.kind:lower(),
+            resource_group:lower(),
+            resource.version:lower()
+          ),
+          {
+            name = ("Kubernetes [%s] [%s@%s/%s]"):format(M.config.version, resource.kind, resource.group, resource.version),
+          }
         ),
-        {
-          name = ("Kubernetes [%s] [%s@%s/%s]"):format(M.config.version, resource.kind, resource.group, resource.version),
-        }
-      )
+      }
     end
 
-    return utils.ensure_and_return(
-      ("https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/%s-standalone-strict/%s-%s.json"):format(
-        M.config.version,
-        resource.kind:lower(),
-        resource_group:lower()
+    return {
+      utils.ensure_and_return(
+        ("https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/%s-standalone-strict/%s-%s.json"):format(
+          M.config.version,
+          resource.kind:lower(),
+          resource_group:lower()
+        ),
+        {
+          name = ("Kubernetes [%s] [%s@%s]"):format(M.config.version, resource.kind, resource.group),
+        }
       ),
-      {
-        name = ("Kubernetes [%s] [%s@%s]"):format(M.config.version, resource.kind, resource.group),
-      }
-    )
+    }
   end
 
-  return utils.ensure_and_return(
-    ("https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/%s/%s_%s.json"):format(resource.group:lower(), resource.kind:lower(), resource.version:lower()),
-    {
-      name = ("Kubernetes [CRD] [%s@%s/%s]"):format(resource.kind, resource.group, resource.version),
-    }
-  )
+  return {
+    utils.ensure_and_return(
+      ("https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/%s/%s_%s.json"):format(resource.group:lower(), resource.kind:lower(), resource.version:lower()),
+      {
+        name = ("Kubernetes [CRD] [%s@%s/%s]"):format(resource.kind, resource.group, resource.version),
+      }
+    ),
+  }
 end
 
----@type schema_companion.Matcher
+function M.match(bufnr)
+  local resources = {}
+
+  local current = {}
+  for _, line in pairs(vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)) do
+    local _, _, group, version = line:find([[^apiVersion:%s*["']?([^%s"'/]*)/?([^%s"']*)]])
+    local _, _, kind = line:find([[^kind:%s*["']?([^%s"'/]*)]])
+
+    if group and group ~= "" then
+      current.group = group
+    end
+    if version and version ~= "" then
+      current.version = version
+    end
+    if kind and kind ~= "" then
+      current.kind = kind
+    end
+
+    if current.group and current.kind then
+      table.insert(resources, current)
+      current = {}
+    end
+  end
+
+  local schemas = {}
+  for _, resource in pairs(resources) do
+    local schema = match_resource(bufnr, resource)
+    if schema then
+      vim.list_extend(schemas, schema)
+    end
+  end
+
+  return schemas
+end
+
 return M

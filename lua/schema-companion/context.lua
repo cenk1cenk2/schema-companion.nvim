@@ -1,34 +1,90 @@
-local M = {}
+local M = {
+  -- format of the identifier should be bufnr: client_id: context
+  ---@type table<number, table<number, schema_companion.Context>>
+  ctx = {},
+}
 
-local matchers = require("schema-companion.matchers")
 local schema = require("schema-companion.schema")
-
 local log = require("schema-companion.log")
 
----@type { client: vim.lsp.Client, schema: schema_companion.Schema, executed: boolean}[]
-M.ctx = {}
-M.initialized_client_ids = {}
+---@param bufnr number
+---@param client_id number
+---@return schema_companion.Context | nil
+function M.read(bufnr, client_id)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+
+  if M.ctx[bufnr] == nil then
+    return nil
+  end
+
+  return M.ctx[bufnr][client_id]
+end
+
+---
+---@param bufnr number
+---@return table<number, schema_companion.Context>
+function M.read_buffer_context(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+
+  if M.ctx[bufnr] == nil then
+    return {}
+  end
+
+  return M.ctx[bufnr]
+end
+
+---@param bufnr number
+---@param client_id number
+---@param context schema_companion.Context
+---@return schema_companion.Context
+function M.write(bufnr, client_id, context)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+
+  if M.ctx[bufnr] == nil then
+    M.ctx[bufnr] = {}
+  end
+
+  M.ctx[bufnr][client_id] = vim.tbl_extend("force", M.ctx[bufnr][client_id] or {}, context)
+
+  return M.ctx[bufnr][client_id]
+end
+
+---
+---@param bufnr number
+---@param client_id number
+---@return boolean
+function M.had_discovered(bufnr, client_id)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+
+  if M.ctx[bufnr] == nil then
+    return false
+  elseif M.ctx[bufnr][client_id] == nil then
+    return false
+  end
+
+  return M.ctx[bufnr][client_id]._discovered or false
+end
 
 ---@param bufnr number
 ---@param client vim.lsp.Client
----@return schema_companion.Schema | nil
+---@return nil
 function M.discover(bufnr, client)
   coroutine.resume(coroutine.create(function()
-    if not M.ctx[bufnr] then
-      log.error("bufnr=%d client_id=%d doesn't exists", bufnr, client.id)
+    if not M.read(bufnr, client.id) then
+      log.error("bufnr=%d client_id=%d doesn't exist", bufnr, client.id)
 
       return
-    elseif not M.initialized_client_ids[client.id] then
+    elseif not require("schema-companion.lsp").has_store_initialized(client.id) then
       log.debug("bufnr=%d client_id=%d is not yet initialized", bufnr, client.id)
 
       return
-    elseif M.ctx[bufnr].executed then
+    elseif M.had_discovered(bufnr, client.id) then
       log.debug("bufnr=%d client_id=%d already executed", bufnr, client.id)
 
-      return M.ctx[bufnr].schema
+      return M.read(bufnr, client.id)
     end
 
-    M.ctx[bufnr].executed = true
+    M.write(bufnr, client.id, { _discovered = true })
 
     local s = M.match(bufnr)
     log.debug("bufnr=%d client_id=%d autodiscover settled: %s", bufnr, client.id, s)
@@ -37,105 +93,69 @@ end
 
 --- Matches a schema to the given buffer.
 ---@param bufnr number?
----@param force boolean?
----@return schema_companion.Schema | nil
-function M.match(bufnr, force)
+---@return schema_companion.Schema[] | nil
+function M.match(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
 
-  if not force then
-    local current_schema = schema.current(bufnr)
+  local ctxs = M.read_buffer_context(bufnr)
 
-    if current_schema and current_schema.name and current_schema.uri ~= schema.default_schema().uri then
-      -- if LSP returns a name that means it came from SchemaStore
-      -- and we can use it right away
-      M.ctx[bufnr].schema = current_schema
-      log.debug("bufnr=%d schema=%s an SchemaStore defined schema matched this file", bufnr, current_schema.name or current_schema.uri)
+  for client_id, ctx in pairs(ctxs) do
+    local schemas = {}
 
-      return M.ctx[bufnr].schema
-    end
-  end
+    for _, source in pairs(ctx.adapter:get_sources()) do
+      local matches = source.match(ctx, bufnr)
 
-  -- if it returned something without a name it means it came from our own
-  -- internal schema table and we have to loop through it to get the name
-  for _, option_schema in ipairs(schema.from_options()) do
-    if current_schema and option_schema.uri == current_schema.uri then
-      log.debug("bufnr=%d schema=%s an user defined schema matched this file", bufnr, option_schema.name)
-      M.schema(bufnr, option_schema)
+      if matches and #matches > 0 then
+        log.debug("bufnr=%d client_id=%d adapter_name=%s schema matched this file: %d", bufnr, client_id, ctx.adapter.name, #matches)
+      end
 
-      return M.ctx[bufnr].schema
-    end
-  end
-
-  log.debug("bufnr=%d no user defined schema matched this file", bufnr)
-
-  -- if LSP is not using any schema, use registered matchers
-  for _, matcher in ipairs(matchers.get()) do
-    local result = matcher.match(bufnr)
-    if result then
-      log.debug("bufnr=%d schema=%s a registered matcher matched this file", bufnr, result.name)
-      M.schema(bufnr, result)
-
-      return M.ctx[bufnr].schema
+      schemas = vim.list_extend(schemas, matches)
     end
 
-    log.debug("bufnr=%d no registered matcher matched this file", bufnr)
+    M.set_ctx_schemas(bufnr, client_id, schemas)
   end
-
-  -- No schema matched
-  log.debug("bufnr=%d no registered schema matches", bufnr)
-end
-
---- gets or sets the schema in its context and lsp
----@param bufnr number
----@param schema schema_companion.Schema | schema_companion.Schema[] | nil
----@return schema_companion.Schema
-function M.schema(bufnr, schema)
-  if bufnr == 0 then
-    bufnr = vim.api.nvim_get_current_buf()
-  end
-
-  if M.ctx[bufnr] == nil then
-    return schema.default_schema()
-  end
-
-  if schema then
-    M.ctx[bufnr].schema = schema
-
-    local client = M.ctx[bufnr].client
-
-    local adapter = require("schema-companion.adapters").get_adapter(client.id)
-
-    M.ctx[bufnr].client = adapter:update_schema(client, bufnr, schema)
-  end
-
-  return M.ctx[bufnr].schema
 end
 
 --- Set the schema used for a buffer.
----@param bufnr? number: Buffer number
----@param s schema_companion.Schema[] | schema_companion.Schema
-function M.set_buffer_schema(bufnr, s)
-  return M.schema(bufnr or vim.api.nvim_get_current_buf(), s)
+---@param bufnr number: Buffer number
+---@param client_id number
+---@return schema_companion.Schema[] | nil
+function M.get_ctx_schemas(bufnr, client_id)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+
+  local ctx = M.read(bufnr, client_id)
+
+  if not ctx then
+    return nil
+  end
+
+  return ctx.schemas
 end
 
---- Get the schema used for a buffer.
----@param bufnr number?: Buffer number
-function M.get_buffer_schema(bufnr)
-  return M.schema(bufnr or vim.api.nvim_get_current_buf())
+--- Set the schema used for a buffer.
+---@param bufnr number: Buffer number
+---@param client_id number
+---@param schemas schema_companion.Schema[]
+function M.set_ctx_schemas(bufnr, client_id, schemas)
+  bufnr = bufnr or 0
+
+  local ctx = M.write(bufnr, client_id, { schemas = schemas })
+
+  ctx.adapter:on_update_schemas(bufnr, schemas)
+
+  return ctx.schemas
 end
 
 ---@param bufnr number
----@param client vim.lsp.Client
-function M.setup(bufnr, client)
-  local state = {
-    client = client,
-    schema = schema.default_schema(),
-    executed = false,
-  }
+---@param adapter schema_companion.Adapter
+function M.setup(bufnr, adapter)
+  M.write(bufnr, adapter:get_client().id, {
+    adapter = adapter,
+    schemas = schema.get_default_schemas(),
+    _discovered = false,
+  })
 
-  M.ctx[bufnr] = state
-
-  M.discover(bufnr, client)
+  M.discover(bufnr, adapter:get_client())
 end
 
 return M

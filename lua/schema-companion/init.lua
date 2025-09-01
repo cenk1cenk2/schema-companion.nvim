@@ -12,21 +12,16 @@ function M.setup(config)
       return require("telescope").load_extension("schema_companion")
     end, debug.traceback)
   end
-
-  for _, matcher in ipairs(c.matchers) do
-    require("schema-companion.matchers").register(matcher)
-  end
 end
 
 --- Configures a LSP client with the schema-companion handlers.
+---@param adapter schema_companion.Adapter --- Adapter for the language server.
 ---@param config? vim.lsp.ClientConfig --- User configuration for the language server.
----@param adapter? schema_companion.Adapter --- Adapter for the language server.
 ---@returns vim.lsp.ClientConfig
-function M.setup_client(config, adapter)
+function M.setup_client(adapter, config)
   config = config or {}
-  adapter = adapter or require("schema-companion.adapters").yamlls_adapter()
 
-  return adapter:setup(config)
+  return adapter:on_setup_client(config)
 end
 
 return M

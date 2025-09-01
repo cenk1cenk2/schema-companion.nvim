@@ -1,92 +1,73 @@
 local M = {}
 
-local config = require("schema-companion.config")
-local matchers = require("schema-companion.matchers")
-local lsp = require("schema-companion.lsp")
-
+--- Check if the given schema is valid.
 ---@param schema schema_companion.Schema
 ---@return boolean
-local valid_schema = function(schema)
+function M.is_valid_schema(schema)
   if schema and schema.uri then
     return true
   end
+
   return false
 end
 
+--- Get the default schema for a placeholder value.
 ---@return schema_companion.Schema
-function M.default_schema()
+function M.get_default_schema()
   return {
     name = "none",
     uri = "none",
   }
 end
 
---- User defined schemas
----@return schema_companion.Schema[]
-function M.from_options()
-  local r = {}
-  if config.options and config.options.schemas then
-    for _, schema in ipairs(config.options.schemas) do
-      if valid_schema(schema) then
-        table.insert(r, schema)
-      end
+function M.get_default_schemas()
+  return { M.get_default_schema() }
+end
+
+---@param bufnr number
+---@return schema_companion.Schema[] | nil
+function M.get_schemas(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+
+  local buffer_context = require("schema-companion.context").read_buffer_context(bufnr)
+
+  local schemas = {}
+  for client_id, ctx in pairs(buffer_context) do
+    local sources = ctx.adapter:get_sources()
+
+    for _, source in pairs(sources) do
+      schemas = vim.list_extend(schemas, M.enrich_schemas(source.get_schemas(ctx) or {}, client_id))
     end
   end
 
-  return r
-end
-
---- Matcher defined schemas
----@return schema_companion.Schema[]
-function M.from_matchers()
-  ---@type schema_companion.Schema[]
-  local r = {}
-  for _, matcher in ipairs(matchers.get()) do
-    r = vim.list_extend(r, matcher.handles())
-  end
-  return r
-end
-
---- Matcher defined schemas
----@return schema_companion.Schema[]
-function M.from_store()
-  local schemas = lsp.get_all_schemas(0)
-  if schemas == nil or vim.tbl_count(schemas or {}) == 0 then
-    return {}
-  end
-
   return schemas
 end
 
----@return schema_companion.Schema[]
-function M.all()
-  local r = {}
-
-  r = vim.list_extend(r, M.from_store())
-  r = vim.list_extend(r, M.from_matchers())
-  r = vim.list_extend(r, M.from_options())
-
-  return r
-end
-
----@return schema_companion.Schema | nil
 ---@param bufnr number
-function M.current(bufnr)
-  local schema = lsp.get_schema(bufnr)
-
-  if not schema then
-    return M.default_schema()
-  end
-
-  return schema
-end
-
 ---@return schema_companion.Schema[] | nil
----@param bufnr number
-function M.matching(bufnr)
-  local schemas = lsp.get_schemas(bufnr)
+function M.get_matching_schemas(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+
+  local buffer_context = require("schema-companion.context").read_buffer_context(bufnr)
+
+  local schemas = {}
+  for client_id, ctx in pairs(buffer_context) do
+    schemas = vim.list_extend(schemas, M.enrich_schemas(ctx.schemas or {}, client_id))
+  end
 
   return schemas
+end
+
+---
+---@param schemas schema_companion.Schema[]
+---@param client_id number
+---@return schema_companion.Schema[]
+function M.enrich_schemas(schemas, client_id)
+  return vim.tbl_map(function(schema)
+    schema.client_id = client_id
+
+    return schema
+  end, schemas)
 end
 
 return M

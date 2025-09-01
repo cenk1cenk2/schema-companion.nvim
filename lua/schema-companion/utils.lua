@@ -13,6 +13,7 @@ function M.ensure_and_return(uri, schema)
 
   if result.status ~= 200 then
     log.debug("Schema does not exist on remote: uri=%s", uri)
+
     return nil
   end
 
@@ -20,8 +21,8 @@ function M.ensure_and_return(uri, schema)
 end
 
 -- taken from require("lspconfig.util").add_hook_after to drop dependency
----@param func
----@param new_fn
+---@param func function | any
+---@param new_fn function | any
 function M.add_hook_after(func, new_fn)
   if func then
     return function(...)
@@ -31,6 +32,17 @@ function M.add_hook_after(func, new_fn)
   else
     return new_fn
   end
+end
+
+--- Evalautes the property and returns the result.
+---@param property function | any
+---@return any
+function M.evaluate_property(property, ...)
+  if type(property) == "function" then
+    return property(...)
+  end
+
+  return property
 end
 
 return M
