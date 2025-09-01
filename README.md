@@ -77,6 +77,40 @@ require("lspconfig").yamlls.setup(require("schema-companion").setup_client({
 }))
 ```
 
+#### Adapters
+
+You can use different adapters for language servers other than `yaml-language-server`. By default it will always use the `yaml-language-server` adapter.
+
+We can take the `helm_ls` language server here as an example.
+
+```lua
+-- your LSP file: ./after/lsp/helm_ls.lua
+return require("schema-companion").setup_client({
+  settings = {
+    flags = {
+      debounce_text_changes = 50,
+    },
+    ["helm-ls"] = {
+      yamlls = {
+        enabled = true,
+        diagnosticsLimit = 50,
+        showDiagnosticsDirectly = false,
+        path = "yaml-language-server",
+        config = {
+          validate = true,
+          format = { enable = true },
+          completion = true,
+          hover = true,
+          schemaDownload = { enable = true },
+          schemaStore = { enable = true, url = "https://www.schemastore.org/api/json/catalog.json" },
+          -- any other config: https://github.com/redhat-developer/yaml-language-server#language-server-settings
+        },
+      },
+    },
+  },
+}, require("schema-companion.adapters").helmls_adapter())
+```
+
 ### Manual Schemas
 
 You can add custom schemas that can be activated manually through the telescope picker.
@@ -145,5 +179,6 @@ require("lualine").setup({
 In some cases you want to create your yaml file from scratch, instead of reloading the buffer you can also trigger match process again.
 
 ```lua
-require("schema-companion.context").match()
+--- force the match to not use the current schema
+require("schema-companion.context").match(0, true)
 ```

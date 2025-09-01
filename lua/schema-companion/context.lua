@@ -37,19 +37,22 @@ end
 
 --- Matches a schema to the given buffer.
 ---@param bufnr number?
+---@param force boolean?
 ---@return schema_companion.Schema | nil
-function M.match(bufnr)
+function M.match(bufnr, force)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
 
-  local current_schema = schema.current(bufnr)
+  if not force then
+    local current_schema = schema.current(bufnr)
 
-  if current_schema and current_schema.name and current_schema.uri ~= schema.default_schema().uri then
-    -- if LSP returns a name that means it came from SchemaStore
-    -- and we can use it right away
-    M.ctx[bufnr].schema = current_schema
-    log.debug("bufnr=%d schema=%s an SchemaStore defined schema matched this file", bufnr, current_schema.name or current_schema.uri)
+    if current_schema and current_schema.name and current_schema.uri ~= schema.default_schema().uri then
+      -- if LSP returns a name that means it came from SchemaStore
+      -- and we can use it right away
+      M.ctx[bufnr].schema = current_schema
+      log.debug("bufnr=%d schema=%s an SchemaStore defined schema matched this file", bufnr, current_schema.name or current_schema.uri)
 
-    return M.ctx[bufnr].schema
+      return M.ctx[bufnr].schema
+    end
   end
 
   -- if it returned something without a name it means it came from our own
@@ -84,9 +87,9 @@ end
 
 --- gets or sets the schema in its context and lsp
 ---@param bufnr number
----@param data schema_companion.Schema | schema_companion.Schema[] | nil
+---@param schema schema_companion.Schema | schema_companion.Schema[] | nil
 ---@return schema_companion.Schema
-function M.schema(bufnr, data)
+function M.schema(bufnr, schema)
   if bufnr == 0 then
     bufnr = vim.api.nvim_get_current_buf()
   end
@@ -95,32 +98,14 @@ function M.schema(bufnr, data)
     return schema.default_schema()
   end
 
-  if data and data.uri and data.name then
-    M.ctx[bufnr].schema = data
+  if schema then
+    M.ctx[bufnr].schema = schema
 
-    local bufuri = vim.uri_from_bufnr(bufnr)
     local client = M.ctx[bufnr].client
 
-    local override = {}
+    local adapter = require("schema-companion.adapters").get_adapter(client.id)
 
-    local schemas = {}
-    if client.settings and client.settings.yaml and client.settings.yaml.schemas then
-      schemas = client.settings.yaml.schemas
-    end
-
-    for u, b in pairs(schemas) do
-      if b == bufuri then
-        override[u] = false
-        log.debug("removed override: file=%s schema=%s", b, u)
-      end
-    end
-
-    override[data.uri] = bufuri
-
-    log.debug("set new override: file=%s schema=%s", bufuri, data.uri)
-
-    client.settings = vim.tbl_deep_extend("force", client.settings, { yaml = { schemas = override } })
-    client:notify("workspace/didChangeConfiguration", { settings = client.settings })
+    M.ctx[bufnr].client = adapter:update_schema(client, bufnr, schema)
   end
 
   return M.ctx[bufnr].schema

@@ -19,4 +19,18 @@ function M.ensure_and_return(uri, schema)
   return vim.tbl_extend("force", { uri = uri }, schema)
 end
 
+-- taken from require("lspconfig.util").add_hook_after to drop dependency
+---@param func
+---@param new_fn
+function M.add_hook_after(func, new_fn)
+  if func then
+    return function(...)
+      func(...)
+      return new_fn(...)
+    end
+  else
+    return new_fn
+  end
+end
+
 return M

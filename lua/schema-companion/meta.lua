@@ -19,3 +19,7 @@ error("Can not source metafile.")
 ---@alias schema_companion.MatcherHandlesFn fun(): schema_companion.Schema[]
 ---@alias schema_companion.MatcherHealthFn fun()
 ---@alias schema_companion.MatcherSetupFn fun(table?): schema_companion.Matcher
+
+---@class schema_companion.Adapter: table
+---@field setup fun(self: schema_companion.Adapter, config: vim.lsp.ClientConfig): vim.lsp.ClientConfig
+---@field update_schema fun(self: schema_companion.Adapter, client: vim.lsp.Client, bufnr: number, schema: schema_companion.Schema | schema_companion.Schema[]): vim.lsp.Client

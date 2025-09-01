@@ -57,8 +57,14 @@ function M.get_schema(bufnr)
   end
 end
 
-function M.store_initialized(_, _, req, _)
-  local client_id = req.client_id
+--- Handler for the "initialized" LSP notification.
+---
+---@param client_id number
+---@param adapter schema_companion.Adapter
+---@return nil
+function M.store_initialized(client_id, adapter)
+  local adapters = require("schema-companion.adapters")
+  adapters.set_adapter(client_id, adapter)
 
   require("schema-companion.context").initialized_client_ids[client_id] = true
 

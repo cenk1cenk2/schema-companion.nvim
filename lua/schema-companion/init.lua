@@ -19,55 +19,14 @@ function M.setup(config)
 end
 
 --- Configures a LSP client with the schema-companion handlers.
----@param config? vim.lsp.ClientConfig
----@returns any
-function M.setup_client(config)
+---@param config? vim.lsp.ClientConfig --- User configuration for the language server.
+---@param adapter? schema_companion.Adapter --- Adapter for the language server.
+---@returns vim.lsp.ClientConfig
+function M.setup_client(config, adapter)
   config = config or {}
+  adapter = adapter or require("schema-companion.adapters").yamlls_adapter()
 
-  -- taken from require("lspconfig.util").add_hook_after to drop dependency
-  local add_hook_after = function(func, new_fn)
-    if func then
-      return function(...)
-        func(...)
-        return new_fn(...)
-      end
-    else
-      return new_fn
-    end
-  end
-
-  -- create capabilities while integrating user-provided capabilities
-  local capabilities = vim.tbl_deep_extend("force", vim.lsp.protocol.make_client_capabilities(), config.capabilities or {}, {
-    workspace = {
-      didChangeConfiguration = {
-        dynamicRegistration = true,
-      },
-    },
-  })
-
-  return vim.tbl_deep_extend(
-    "force",
-    {},
-    config,
-    ---@type vim.lsp.ClientConfig
-    {
-      capabilities = capabilities,
-
-      on_attach = add_hook_after(config.on_attach, function(client, bufnr)
-        require("schema-companion.context").setup(bufnr, client)
-      end),
-
-      on_init = add_hook_after(config.on_init, function(client)
-        client:notify("yaml/supportSchemaSelection", { {} })
-
-        return true
-      end),
-
-      handlers = vim.tbl_extend("force", config.handlers or {}, {
-        ["yaml/schema/store/initialized"] = require("schema-companion.lsp").store_initialized,
-      }),
-    }
-  )
+  return adapter:setup(config)
 end
 
 return M
