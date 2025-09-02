@@ -87,7 +87,7 @@ function M.get_schemas(bufnr)
   return schemas
 end
 
----@param bufnr number
+---@param bufnr? number
 ---@return schema_companion.EnrichedSchema[] | nil
 function M.get_matching_schemas(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
@@ -116,9 +116,11 @@ function M.enrich_schemas(schemas, bufnr, client_id)
   end, schemas)
 end
 
----@param bufnr number
+---@param bufnr? number
 ---@return string | nil
 function M.get_current_schemas(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+
   local schemas = M.get_matching_schemas(bufnr)
 
   if schemas == nil or #schemas == 0 then
