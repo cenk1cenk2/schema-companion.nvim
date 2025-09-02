@@ -2,17 +2,17 @@ local M = {}
 
 ---@class schema_companion.Config
 ---@field log_level? number
----@field enable_telescope? boolean
 
 ---@type schema_companion.Config
 local defaults = {
   log_level = vim.log.levels.INFO,
-  enable_telescope = false,
 }
 
 ---@type schema_companion.Config
 ---@diagnostic disable-next-line: missing-fields
-M.options = {}
+M.options = {
+  log_level = vim.log.levels.INFO,
+}
 
 ---@param config schema_companion.Config
 ---@return schema_companion.Config

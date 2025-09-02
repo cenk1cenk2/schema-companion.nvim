@@ -14,9 +14,9 @@ function M.request_sync(client, method, bufnr)
   local response, error = client:request_sync(method, { vim.uri_from_bufnr(bufnr) }, sync_timeout, bufnr)
 
   if error then
-    log.debug("failed LSP request: method=%s client=%s bufnr=%d error=%s", client.name, bufnr, error)
+    log.debug("failed lsp request: method=%s client=%s bufnr=%d error=%s", client.name, bufnr, error)
   elseif response and response.err then
-    log.debug("failed LSP request: method=%s client=%s bufnr=%d error=%s", method, client.name, bufnr, response.err)
+    log.debug("failed lsp request: method=%s client=%s bufnr=%d error=%s", method, client.name, bufnr, response.err)
   elseif response and response.result then
     return response.result
   end
@@ -41,14 +41,14 @@ function M.on_store_initialized(client_id, adapter)
   local buffers = vim.lsp.get_buffers_by_client_id(client_id)
 
   for _, bufnr in ipairs(buffers) do
-    log.debug("client_id=%s bufnr=%d running autodiscover", client_id, bufnr)
+    log.debug("running autodiscover: client_id=%s bufnr=%d", client_id, bufnr)
 
     require("schema-companion.context").discover(bufnr, client)
   end
 end
 
 function M.has_store_initialized(client_id)
-  return vim.tbl_contains(vim.tbl_keys(require("schema-companion.adapters").ctx), client_id)
+  return require("schema-companion.adapters").has_initialized(client_id)
 end
 
 return M

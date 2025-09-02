@@ -1,7 +1,5 @@
----@class schema_companion.Matcher
+---@class schema_companion.Source
 local M = {}
-
--- TODO: REFACTOR ME AFTER
 
 local log = require("schema-companion.log")
 local utils = require("schema-companion.utils")
@@ -12,7 +10,11 @@ M.config = {
   version = "master",
 }
 
+---
+---@param config { version: string }
+---@return schema_companion.Source
 function M.setup(config)
+  setmetatable(M, {})
   M.config = vim.tbl_deep_extend("force", {}, M.config, config)
 
   return M
@@ -117,7 +119,7 @@ local match_resource = function(bufnr, resource)
   }
 end
 
-function M.match(bufnr)
+function M:match(_, bufnr)
   local resources = {}
 
   local current = {}

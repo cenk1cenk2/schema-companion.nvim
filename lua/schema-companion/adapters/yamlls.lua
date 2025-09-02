@@ -63,7 +63,7 @@ function M:on_update_schemas(bufnr, schemas)
     end
   end
 
-  for _, schema in pairs(schemas) do
+  for _, schema in ipairs(schemas) do
     override[schema.uri] = bufuri
 
     log.debug("set new override: file=%s schema=%s adapter=%s", bufuri, schema.uri, M.name)
@@ -82,7 +82,7 @@ function M:get_schemas_from_lsp()
 
   local schemas = require("schema-companion.lsp").request_sync(client, "yaml/get/all/jsonSchemas") or {}
 
-  log.debug("get schemas from lsp: adapter_name=%s client_id=%d schema_count=%d", self.name, client.id, #schemas)
+  log.debug("get schemas from lsp: adapter_name=%s client_id=%d #schema=%d", self.name, client.id, #schemas)
 
   return schemas
 end
@@ -92,7 +92,7 @@ function M:match_schema_from_lsp(bufnr)
 
   local schemas = require("schema-companion.lsp").request_sync(client, "yaml/get/jsonSchemas", bufnr) or {}
 
-  log.debug("match schemas from lsp: adapter_name=%s client_id=%d schema_count=%d", self.name, client.id, #schemas)
+  log.debug("match schemas from lsp: adapter_name=%s client_id=%d #schema=%d", self.name, client.id, #schemas)
 
   return schemas
 end
