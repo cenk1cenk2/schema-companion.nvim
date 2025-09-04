@@ -129,7 +129,7 @@ function M.get_current_schemas(bufnr)
 
   local first = schemas[1]
 
-  return ("%s%s"):format(first.name or first.description or first.uri, #schemas > 1 and (" (+%d)"):format(#schemas - 1) or "")
+  return ("%s (%s)%s"):format(first.name or first.description or first.uri, first.source or "unknown", #schemas > 1 and (" (and +%d)"):format(#schemas - 1) or "")
 end
 
 return M

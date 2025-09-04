@@ -3,7 +3,7 @@ local M = {}
 ---@param item schema_companion.EnrichedSchema
 ---@return string
 local function format_item(item)
-  return ("(%s) %s"):format(item.name or item.description or item.uri, item.source or "unknown")
+  return ("%s (%s)"):format(item.name or item.description or item.uri, item.source or "unknown")
 end
 
 ---
