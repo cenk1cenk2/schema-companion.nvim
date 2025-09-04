@@ -5,6 +5,7 @@ local M = {
   helmls = require("schema-companion.adapters.helmls"),
   yamlls = require("schema-companion.adapters.yamlls"),
   jsonls = require("schema-companion.adapters.jsonls"),
+  taplo = require("schema-companion.adapters.taplo"),
 }
 
 local log = require("schema-companion.log")

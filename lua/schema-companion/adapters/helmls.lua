@@ -70,8 +70,6 @@ function M:on_update_schemas(bufnr, schemas)
   client:notify("workspace/didChangeConfiguration", { settings = client.settings })
 
   log.debug("notified client of configuration changes: file=%s adapter=%s client_id=%d schemas=%s", bufuri, M.name, client.id, override)
-
-  return client
 end
 
 M.setup = require("schema-companion.adapters.metatable").new(M)

@@ -1,7 +1,7 @@
 ---@class schema_companion.Adapter
 local M = {}
 
-M.name = "jsonls"
+M.name = "taplo"
 
 local log = require("schema-companion.log")
 local utils = require("schema-companion.utils")
@@ -11,9 +11,10 @@ local utils = require("schema-companion.utils")
 local function parse_schemas(schemas)
   return vim.tbl_map(function(schema)
     return {
+      name = schema.meta.name,
       uri = schema.url,
-      name = schema.name,
       description = schema.description,
+      source = schema.meta.source,
     }
   end, schemas)
 end
@@ -25,7 +26,6 @@ function M:on_setup_client(config)
     config,
     ---@type vim.lsp.ClientConfig
     {
-
       on_attach = utils.add_hook_after(config.on_attach, function(client, bufnr)
         self:set_client(client)
 
@@ -43,29 +43,29 @@ function M:on_update_schemas(bufnr, schemas)
 
   local override = vim.tbl_map(function(schema)
     return {
-      fileMatch = { bufuri },
-      uri = schema.uri,
+      ["document_uri"] = bufuri,
+      ["schema_uri"] = schema.uri,
+      ["rule"] = {
+        url = bufuri,
+      },
     }
   end, schemas)
 
   log.debug("set new override: file=%s schemas=%s adapter=%s", bufuri, override, M.name)
 
   ---@diagnostic disable-next-line: param-type-mismatch
-  client:notify("json/schemaAssociations", { override })
-  ---@diagnostic disable-next-line: param-type-mismatch
-  client:notify("json/schemaContent", {
-    vim.tbl_map(function(schema)
-      return schema.uri
-    end, override),
-  })
+  client:notify("taplo/associateSchema", { override })
 
   log.debug("notified client of configuration changes: file=%s adapter=%s client_id=%d schemas=%s", bufuri, M.name, client.id, override)
 end
 
-function M:get_schemas_from_lsp()
+function M:get_schemas_from_lsp(bufnr)
   local client = self:get_client()
+  local bufuri = vim.uri_from_bufnr(bufnr)
 
-  local schemas = vim.tbl_get(client, "settings", "json", "schemas")
+  local schemas = require("schema-companion.lsp").request_sync(client, "taplo/listSchemas", { ["documentUri"] = bufuri }) or {}
+  schemas = schemas.schemas
+
   schemas = parse_schemas(schemas)
 
   log.debug("get schemas from lsp: adapter_name=%s client_id=%d #schema=%d", self.name, client.id, #schemas)
@@ -75,22 +75,11 @@ end
 
 function M:match_schema_from_lsp(bufnr)
   local client = self:get_client()
-  local bufuri = vim.uri_from_bufnr(bufnr)
 
-  local res = require("schema-companion.lsp").request_sync(client, "json/languageStatus", bufuri) or {}
-  local schemas = res.schemas or {}
+  local schemas = require("schema-companion.lsp").request_sync(client, "taplo/associatedSchema", { ["documentUri"] = vim.uri_from_bufnr(bufnr) }, bufnr) or {}
 
-  local current_schemas = {}
-  if vim.tbl_get(client, "settings", "json", "schemas") then
-    ---@diagnostic disable-next-line: undefined-field
-    current_schemas = client.settings.json.schemas
-  end
-
-  current_schemas = parse_schemas(schemas)
-
-  schemas = vim.tbl_filter(function(schema)
-    return vim.list_contains(schemas, schema.uri)
-  end, current_schemas)
+  schemas = { schemas.schema }
+  schemas = parse_schemas(schemas)
 
   log.debug("match schemas from lsp: adapter_name=%s client_id=%d #schema=%d", self.name, client.id, #schemas)
 

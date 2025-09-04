@@ -9,7 +9,11 @@ M.config = {}
 ---@return schema_companion.Schema[]
 local function enrich_schemas(schemas)
   for _, schema in ipairs(schemas) do
-    schema.source = M.name
+    if schema.source then
+      schema.source = ("%s/%s"):format(M.name, schema.source)
+    else
+      schema.source = M.name
+    end
   end
 
   return schemas
