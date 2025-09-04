@@ -15,7 +15,7 @@ end
 local function enrich_schemas(ctx, schemas)
   local client = ctx.adapter:get_client()
   for _, schema in ipairs(schemas) do
-    schema.source = ("%s:%s"):format(M.name, client.name or client.id)
+    schema.source = ("%s/%s"):format(M.name, client.name or client.id)
   end
 
   return schemas
