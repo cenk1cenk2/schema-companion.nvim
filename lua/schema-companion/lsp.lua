@@ -6,15 +6,16 @@ local sync_timeout = 5000
 
 ---@param client vim.lsp.Client
 ---@param method string
+---@param params? any
 ---@param bufnr? number
 ---@return table | nil
-function M.request_sync(client, method, bufnr)
-  bufnr = bufnr or 0
+function M.request_sync(client, method, params, bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
 
-  local response, error = client:request_sync(method, { vim.uri_from_bufnr(bufnr) }, sync_timeout, bufnr)
+  local response, error = client:request_sync(method, params or {}, sync_timeout, bufnr)
 
   if error then
-    log.debug("failed lsp request: method=%s client=%s bufnr=%d error=%s", client.name, bufnr, error)
+    log.error("failed lsp request: method=%s client=%s bufnr=%d error=%s", client.name, bufnr, error)
   elseif response and response.err then
     log.debug("failed lsp request: method=%s client=%s bufnr=%d error=%s", method, client.name, bufnr, response.err)
   elseif response and response.result then

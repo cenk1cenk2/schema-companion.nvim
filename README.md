@@ -57,12 +57,14 @@ Plugin has an adapter based system, where you can define different configuration
 
 #### LSP Overlay Method
 
+##### YAMLLS
+
 ```lua
 -- your LSP file: ./after/lsp/yamlls.lua
 return require("schema-companion").setup_client(
   require("schema-companion").adapters.yamlls.setup({
     sources = {
-      -- an example configuration for sources would be
+      -- your sources for the language server
       require("schema-companion").sources.matchers.kubernetes.setup({ version = "master" }),
       require("schema-companion").sources.lsp.setup(),
       require("schema-companion").sources.schemas.setup({
@@ -79,12 +81,31 @@ return require("schema-companion").setup_client(
 )
 ```
 
+##### HELMLS
+
 ```lua
 -- your LSP file: ./after/lsp/helm_ls.lua
 return require("schema-companion").setup_client(
   require("schema-companion").adapters.helmls.setup({
     sources = {
       -- your sources for the language server
+      require("schema-companion").sources.matchers.kubernetes.setup({ version = "master" }),
+    },
+  }),
+  {
+    --- your language server configuration
+  }
+)
+```
+
+##### JSONLS
+
+```lua
+-- your LSP file: ./after/lsp/jsonls.lua
+return require("schema-companion").setup_client(
+  require("schema-companion").adapters.jsonls.setup({
+    sources = {
+      require("schema-companion").sources.lsp.setup(),
     },
   }),
   {
@@ -117,8 +138,9 @@ Adapter is responsible for following.
 
 Available adapters for the plugin is as follows.
 
-- `require("schema-companion").adapters.yamlls`
-- `require("schema-companion").adapters.helmls`
+- `require("schema-companion").adapters.yamlls.setup()`
+- `require("schema-companion").adapters.helmls.setup()`
+- `require("schema-companion").adapters.jsonls.setup()`
 
 ### Sources
 
