@@ -18,6 +18,7 @@ end
 function M.get_default_schema()
   return {
     name = "none",
+    description = "No schema that matches",
     uri = nil,
   }
 end
