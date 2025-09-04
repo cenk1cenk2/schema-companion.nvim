@@ -22,7 +22,7 @@ error("Can not source metafile.")
 
 ---@alias schema_companion.SourceSetupFn fun(table?): schema_companion.Source
 ---@alias schema_companion.SourceMatchFn fun(self: schema_companion.Source, ctx: schema_companion.Context, bufnr?: number): schema_companion.Schema[]
----@alias schema_companion.SourceGetSchemasFn fun(self: schema_companion.Source, ctx: schema_companion.Context): schema_companion.Schema[]
+---@alias schema_companion.SourceGetSchemasFn fun(self: schema_companion.Source, ctx: schema_companion.Context, bufnr?: number): schema_companion.Schema[]
 
 ---@class schema_companion.Adapter: table
 ---@field ctx schema_companion.AdapterCtx
@@ -47,9 +47,9 @@ error("Can not source metafile.")
 
 ---@alias schema_companion.AdapterSetupFn fun(config: schema_companion.AdapterConfig): schema_companion.Adapter
 ---@alias schema_companion.AdapterOnSetupClientFn fun(self: schema_companion.Adapter, config: vim.lsp.ClientConfig): vim.lsp.ClientConfig
----@alias schema_companion.AdapterOnUpdateSchemaFn fun(self: schema_companion.Adapter, bufnr: number, schemas: schema_companion.Schema[]): vim.lsp.Client
+---@alias schema_companion.AdapterOnUpdateSchemaFn fun(self: schema_companion.Adapter, bufnr: number, schemas: schema_companion.Schema[]): nil
 ---@alias schema_companion.AdapterGetSourcesFn fun(self: schema_companion.Adapter): schema_companion.Source[]
----@alias schema_companion.AdapterGetSchemasFn fun(self: schema_companion.Adapter): schema_companion.Schema[]
+---@alias schema_companion.AdapterGetSchemasFn fun(self: schema_companion.Adapter, bufnr: number): schema_companion.Schema[]
 
 ---@class schema_companion.Context
 ---@field adapter schema_companion.Adapter

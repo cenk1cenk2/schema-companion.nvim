@@ -57,7 +57,7 @@ Plugin has an adapter based system, where you can define different configuration
 
 #### LSP Overlay Method
 
-##### YAMLLS
+##### Yaml Language Server
 
 ```lua
 -- your LSP file: ./after/lsp/yamlls.lua
@@ -81,7 +81,7 @@ return require("schema-companion").setup_client(
 )
 ```
 
-##### HELMLS
+##### Helm Language Server
 
 ```lua
 -- your LSP file: ./after/lsp/helm_ls.lua
@@ -98,12 +98,29 @@ return require("schema-companion").setup_client(
 )
 ```
 
-##### JSONLS
+##### Json Language Server
 
 ```lua
 -- your LSP file: ./after/lsp/jsonls.lua
 return require("schema-companion").setup_client(
   require("schema-companion").adapters.jsonls.setup({
+    sources = {
+      require("schema-companion").sources.lsp.setup(),
+      require("schema-companion").sources.none.setup(),
+    },
+  }),
+  {
+    --- your language server configuration
+  }
+)
+```
+
+##### Taplo
+
+```lua
+-- your LSP file: ./after/lsp/taplo.lua
+return require("schema-companion").setup_client(
+  require("schema-companion").adapters.taplo.setup({
     sources = {
       require("schema-companion").sources.lsp.setup(),
       require("schema-companion").sources.none.setup(),
@@ -142,6 +159,9 @@ Available adapters for the plugin is as follows.
 - `require("schema-companion").adapters.yamlls.setup()`
 - `require("schema-companion").adapters.helmls.setup()`
 - `require("schema-companion").adapters.jsonls.setup()`
+- `require("schema-companion").adapters.taplo.setup()`
+
+**WITH THE CURRENT MODULAR ARCHITECTURE REALLY REALLY WILL APPRECIATE ANY CONTRIBITIONS.**
 
 ### Sources
 

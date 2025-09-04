@@ -80,7 +80,7 @@ function M.get_schemas(bufnr)
 
     for _, source in pairs(sources) do
       if type(source.get_schemas) == "function" then
-        schemas = vim.list_extend(schemas, M.enrich_schemas(source:get_schemas(ctx) or {}, bufnr, client_id))
+        schemas = vim.list_extend(schemas, M.enrich_schemas(source:get_schemas(ctx, bufnr) or {}, bufnr, client_id))
       end
     end
   end

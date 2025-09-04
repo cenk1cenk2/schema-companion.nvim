@@ -15,14 +15,18 @@ end
 local function enrich_schemas(ctx, schemas)
   local client = ctx.adapter:get_client()
   for _, schema in ipairs(schemas) do
-    schema.source = ("%s/%s"):format(M.name, client.name or client.id)
+    if schema.source then
+      schema.source = ("%s/%s/%s"):format(M.name, client.name or client.id, schema.source)
+    else
+      schema.source = ("%s/%s"):format(M.name, client.name or client.id)
+    end
   end
 
   return schemas
 end
 
-function M:get_schemas(ctx)
-  return enrich_schemas(ctx, ctx.adapter:get_schemas_from_lsp()) or {}
+function M:get_schemas(ctx, bufnr)
+  return enrich_schemas(ctx, ctx.adapter:get_schemas_from_lsp(bufnr)) or {}
 end
 
 function M:match(ctx, bufnr)
