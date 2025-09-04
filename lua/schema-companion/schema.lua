@@ -18,7 +18,7 @@ end
 function M.get_default_schema()
   return {
     name = "none",
-    uri = "none",
+    uri = nil,
   }
 end
 
