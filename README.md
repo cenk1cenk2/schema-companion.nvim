@@ -198,6 +198,17 @@ sources = {
 },
 ```
 
+#### None
+
+None source provides a way to reset the current schema to `none`.
+
+```lua
+sources = {
+  -- your sources for the language server
+  require("schema-companion").sources.none.setup()
+},
+```
+
 ## Usage
 
 ### Select From All Available Schemas
