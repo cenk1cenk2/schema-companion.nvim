@@ -1,16 +1,18 @@
 # schema-companion.nvim
 
-Forked from the original repository [someone-stole-my-name/yaml-companion.nvim](https://github.com/someone-stole-my-name/yaml-companion.nvim) and expanded for a bit more modularity to work with multiple language servers like `yaml-language-server` and `helm-ls` at the same time as well as automatic Kubernetes CRD detection. I have been happily using the plugin with some caveats, so I wanted to refactor it a bit to match my current mostly Kubernetes working environment.
+**Forked from the original repository [someone-stole-my-name/yaml-companion.nvim](https://github.com/someone-stole-my-name/yaml-companion.nvim) and expanded for a bit more modularity.**
 
-Currently in the dogfooding stage with matching all the resources, but the following features are available.
+## IMPORTANT NOTICE
+
+**This plugin has been rewritten to be more modular and extendable. All the setup and configuration of the repository has changed. You can use the `legacy` branch if you want to use the old version while migrating.**
 
 ## Features
 
-- Ability to add any kind of matcher, that can detect schema based on content.
-- Kubernetes resources can be matched utilizing the repository [yannh/kubernetes-json-schema](https://github.com/yannh/kubernetes-json-schema). ![kubernetes](./media/kubernetes.png)
-- Kubernetes CRD definitions can be matched utilizing the repository [datreeio/CRDs-catalog](https://github.com/datreeio/crds-catalog). ![kubernetes-crd](./media/kubernetes-crd.png)
-- Change matcher variables on the fly, like the Kubernetes version. Do not be stuck with whatever `yaml-language-server` has hardcoded at the given time. ![kubernetes-version](./media/kubernetes-version.png)
-- Select one from multiple matchers for the current buffer to not have any collisions in the `yaml-language-server`.
+- Works and intended to work with multiple language servers. Adapter based system, where you can define different configurations per language server.
+- Can match multiple schemas at the same time, where the user can narrow down between the candidates.
+- Supports arbitrary matchers to detect schema based on content.
+  - Kubernetes resources can be matched utilizing the repository [yannh/kubernetes-json-schema](https://github.com/yannh/kubernetes-json-schema). ![kubernetes](./media/kubernetes.png)
+  - Kubernetes CRD definitions can be matched utilizing the repository [datreeio/CRDs-catalog](https://github.com/datreeio/crds-catalog). ![kubernetes-crd](./media/kubernetes-crd.png)
 
 ## Installation
 
@@ -21,18 +23,10 @@ return {
   "cenk1cenk2/schema-companion.nvim",
   dependencies = {
     { "nvim-lua/plenary.nvim" },
-    { "nvim-telescope/telescope.nvim" },
   },
   config = function()
     -- PLEASE FOLLOW THE CONFIGURATION INSTRUCTIONS BELOW SINCE THERE IS AN ADDITIONAL STEP NEEDED FOR EACH LANGUAGE SERVER
-    require("schema-companion").setup({
-      -- if you have telescope you can register the extension
-      enable_telescope = true,
-      matchers = {
-        -- add your matchers
-        require("schema-companion.matchers.kubernetes").setup({ version = "master" }),
-      },
-    })
+    require("schema-companion").setup({})
   end,
 }
 ```
@@ -43,6 +37,8 @@ Plugin has to be configured once, and the language servers can be added by exten
 
 **If you do not configure the language server with the `setup_client` function, the plugin will not work for the given language server.**
 
+**THIS PLUGIN IS A LITTLE BIT MORE INVOLVED THAN AVERAGE PLUGIN, PLEASE FOLLOW THE INSTRUCTIONS CAREFULLY.**
+
 ### Setup
 
 The default plugin configuration for the setup function is as below.
@@ -50,108 +46,158 @@ The default plugin configuration for the setup function is as below.
 ```lua
 require("schema-companion").setup({
   log_level = vim.log.levels.INFO,
-  enable_telescope = false,
-  matchers = {},
-  schemas = {},
 })
 ```
 
 ### Language Server Configuration
 
-You can automatically extend your configuration of the `yaml-language-server` or `helm-ls` with the following configuration.
+You can automatically extend your configuration of the language server by wrapping it with `schema-companion.setup_client` function.
 
-#### Lsp Overlay Method
+Plugin has an adapter based system, where you can define different configurations per language server.
+
+#### LSP Overlay Method
 
 ```lua
 -- your LSP file: ./after/lsp/yamlls.lua
-return require("schema-companion").setup_client({
-  -- your yaml language server configuration
-})
+return require("schema-companion").setup_client(
+  require("schema-companion").adapters.yamlls.setup({
+    sources = {
+      -- an example configuration for sources would be
+      require("schema-companion").sources.matchers.kubernetes.setup({ version = "master" }),
+      require("schema-companion").sources.lsp.setup(),
+      require("schema-companion").sources.schemas.setup({
+        {
+          name = "Kubernetes master",
+          uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/all.json",
+        },
+      }),
+    },
+  }),
+  {
+    --- your yaml language server configuration
+  }
+)
 ```
 
-#### LSP Config Method
+```lua
+-- your LSP file: ./after/lsp/helm_ls.lua
+return require("schema-companion").setup_client(
+  require("schema-companion").adapters.helmls.setup({
+    sources = {
+      -- your sources for the language server
+    },
+  }),
+  {
+    --- your language server configuration
+  }
+)
+```
+
+#### LSP Config Method (deprecated)
+
+You can also use the `lspconfig` method to setup the language server, where the same methodology applies.
 
 ```lua
-require("lspconfig").yamlls.setup(require("schema-companion").setup_client({
+require("lspconfig").yamlls.setup(require("schema-companion").setup_client(adapter, {
   -- your yaml language server configuration
 }))
 ```
 
-#### Adapters
+### Adapters
 
-You can use different adapters for language servers other than `yaml-language-server`. By default it will always use the `yaml-language-server` adapter.
+You can use specific adapters or bring your own adapter to implement schema support for a given language server.
 
-We can take the `helm_ls` language server here as an example.
+Adapter is responsible for following.
 
-```lua
--- your LSP file: ./after/lsp/helm_ls.lua
-return require("schema-companion").setup_client({
-  settings = {
-    flags = {
-      debounce_text_changes = 50,
-    },
-    ["helm-ls"] = {
-      yamlls = {
-        enabled = true,
-        diagnosticsLimit = 50,
-        showDiagnosticsDirectly = false,
-        path = "yaml-language-server",
-        config = {
-          validate = true,
-          format = { enable = true },
-          completion = true,
-          hover = true,
-          schemaDownload = { enable = true },
-          schemaStore = { enable = true, url = "https://www.schemastore.org/api/json/catalog.json" },
-          -- any other config: https://github.com/redhat-developer/yaml-language-server#language-server-settings
-        },
-      },
-    },
-  },
-}, require("schema-companion.adapters").helmls_adapter())
-```
+- Hooking the LSP for schema companion to initiate it.
+- Communicating with the LSP to get available or current schemas.
+- Updating the configuration of LSP on schema changes.
 
-### Manual Schemas
+**Every language server is supposed to have its own adapter to function properly.**
 
-You can add custom schemas that can be activated manually through the telescope picker.
+Available adapters for the plugin is as follows.
+
+- `require("schema-companion").adapters.yamlls`
+- `require("schema-companion").adapters.helmls`
+
+### Sources
+
+Sources can be added into adapters which implies that for a given adapter they are provider of schemas. Therefore sources can be configured per language server.
+
+Whenever you call the setup function of the adapter, you can pass the source provider to given language server configuration.
+
+Available sources for the plugin is as follows.
+
+#### LSP
+
+To enable language server implicilitly using schemas provided by the language server you have to load the given source.
 
 ```lua
-schemas = {
-  {
-    name = "Kubernetes master",
-    uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/all.json",
-  },
-  {
-    name = "Kubernetes v1.30",
-    uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.30.3-standalone-strict/all.json",
-  },
-}
+sources = {
+  -- your sources for the language server
+  require("schema-companion").sources.lsp.setup()
+},
 ```
 
-### Matchers
+#### Schemas
 
-Adding custom matchers are as easy as defining a function that detects and handles a schema.
+You can provide static set of schemas where you do want to only manual selection with it, you can use the schemas source.
+
+```lua
+sources = {
+  -- your sources for the language server
+  require("schema-companion").sources.schemas.setup({
+    {
+      name = "Kubernetes v1.29",
+      uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.29.7-standalone-strict/all.json",
+    },
+    {
+      name = "Kubernetes v1.30",
+      uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.30.3-standalone-strict/all.json",
+    },
+  })
+},
+```
+
+#### Matchers
+
+Matchers are custom functionality that behaves and matches a schema depending on the content of the file.
+
+Available matchers for the plugin is as follows.
+
+##### Kubernetes
+
+```lua
+sources = {
+  -- your sources for the language server
+  require("schema-companion").sources.matchers.kubernetes.setup({
+    version = "master"
+  })
+},
+```
 
 ## Usage
 
-### Schema Picker
+### Select From All Available Schemas
 
-You can map the `telescope` picker to any keybinding of your choice.
+You can select the schema of your desired choice from a list of schemas and apply it to the current buffer.
 
 ```lua
-require("telescope").extensions.schema_companion.select_schema()
+require("schema-companion").select_schema()
 ```
+
+### Select From Matching Schemas
 
 If there are multiple matches for the buffer, you can select the schema manually from the ones that matches.
 
 ```lua
-require("telescope").extensions.schema_companion.select_from_matching_schemas()
+require("schema-companion").select_from_matching_schema()
 ```
 
 ### Current Schema
 
 ```lua
-local schema = require("schema-companion.context").get_buffer_schema()
+local schema = require("schema-companion").get_current_schemas()
 ```
 
 This can be further utilized in `lualine` as follows.
@@ -163,7 +209,7 @@ require("lualine").setup({
     lualine_c = {
       {
         function()
-          return ("%s"):format(require("schema-companion.context").get_buffer_schema().name)
+          return ("%s %s"):format(nvim.ui.icons.ui.Table, require("schema-companion").get_current_schemas() or "none"):sub(0, 128)
         end,
         cond = function()
           return package.loaded["schema-companion"]
@@ -180,5 +226,5 @@ In some cases you want to create your yaml file from scratch, instead of reloadi
 
 ```lua
 --- force the match to not use the current schema
-require("schema-companion.context").match(0, true)
+require("schema-companion").match()
 ```

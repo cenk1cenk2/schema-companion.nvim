@@ -1,7 +1,7 @@
 ---
 # https://taskfile.dev
 
-version: '3'
+version: "3"
 
 vars: {}
 
@@ -13,11 +13,12 @@ tasks:
     cmds:
       - stylua --config-path .stylua.toml . -v
     sources:
-      - 'lua/**/*.lua'
+      - "lua/**/*.lua"
 
   lint:
     desc: Lint the repository.
     cmds:
       - stylua --config-path .stylua.toml --check .
+      - selene .
     sources:
-      - 'lua/**/*.lua'
+      - "lua/**/*.lua"
