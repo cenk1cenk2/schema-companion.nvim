@@ -1,16 +1,26 @@
 ---@class schema_companion.Source
 local M = {}
 
-M.name = "schemas"
+M.name = "Schemas"
 
 M.config = {}
 
+---@param schemas schema_companion.Schema[]
+---@return schema_companion.Schema[]
+local function enrich_schemas(schemas)
+  for _, schema in ipairs(schemas) do
+    schema.source = M.name
+  end
+
+  return schemas
+end
+
 ---
----@param config schema_companion.Schema[]
+---@param schemas schema_companion.Schema[]
 ---@return schema_companion.Source
-function M.setup(config)
+function M.setup(schemas)
   setmetatable(M, {})
-  M.config = config
+  M.config = enrich_schemas(schemas)
 
   return M
 end

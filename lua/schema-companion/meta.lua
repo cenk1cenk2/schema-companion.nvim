@@ -6,6 +6,7 @@ error("Can not source metafile.")
 ---@field name? string
 ---@field uri? string
 ---@field description? string
+---@field source? string
 
 ---@class schema_companion.EnrichedSchema: schema_companion.Schema
 ---@field bufnr? number

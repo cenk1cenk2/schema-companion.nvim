@@ -21,6 +21,7 @@ function M:match(_, bufnr)
       {
         name = "cloud-init",
         uri = "https://raw.githubusercontent.com/canonical/cloud-init/main/cloudinit/config/schemas/versions.schema.cloud-config.json",
+        source = M.name,
       },
     }
   end

@@ -1,5 +1,11 @@
 local M = {}
 
+---@param item schema_companion.EnrichedSchema
+---@return string
+local function format_item(item)
+  return ("(%s) %s"):format(item.name or item.description or item.uri, item.source or "unknown")
+end
+
 ---
 ---@param bufnr? number
 function M.select_schema(bufnr)
@@ -8,9 +14,7 @@ function M.select_schema(bufnr)
 
   vim.ui.select(schema.get_schemas(bufnr) or {}, {
     prompt = "Select a schema:",
-    format_item = function(item)
-      return item.name or item.description or item.uri
-    end,
+    format_item = format_item,
   }, function(item)
     if not item then
       return
@@ -28,9 +32,7 @@ function M.select_matching_schema(bufnr)
 
   vim.ui.select(schema.get_matching_schemas(bufnr) or {}, {
     prompt = "Select from matching schemas:",
-    format_item = function(item)
-      return item.name or item.description or item.uri
-    end,
+    format_item = format_item,
   }, function(item)
     if not item then
       return

@@ -89,7 +89,8 @@ local match_resource = function(bufnr, resource)
             resource.version:lower()
           ),
           {
-            name = ("Kubernetes [%s] [%s@%s/%s]"):format(M.config.version, resource.kind, resource.group, resource.version),
+            name = ("[%s] [%s@%s/%s]"):format(M.config.version, resource.kind, resource.group, resource.version),
+            source = M.name,
           }
         ),
       }
@@ -103,7 +104,8 @@ local match_resource = function(bufnr, resource)
           resource_group:lower()
         ),
         {
-          name = ("Kubernetes [%s] [%s@%s]"):format(M.config.version, resource.kind, resource.group),
+          name = ("[%s] [%s@%s]"):format(M.config.version, resource.kind, resource.group),
+          source = M.name,
         }
       ),
     }
@@ -113,7 +115,8 @@ local match_resource = function(bufnr, resource)
     utils.ensure_and_return(
       ("https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/%s/%s_%s.json"):format(resource.group:lower(), resource.kind:lower(), resource.version:lower()),
       {
-        name = ("Kubernetes [CRD] [%s@%s/%s]"):format(resource.kind, resource.group, resource.version),
+        name = ("[%s@%s/%s]"):format(resource.kind, resource.group, resource.version),
+        source = ("%s/%s"):format(M.name, "CRD"),
       }
     ),
   }
