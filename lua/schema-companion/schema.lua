@@ -54,9 +54,12 @@ function M.match(bufnr)
       if type(source.match) == "function" then
         local matches = source:match(ctx, bufnr)
 
-        log.debug("schema matched: bufnr=%d client_id=%d adapter_name=%s #matches=%d", bufnr, client_id, ctx.adapter.name, #matches)
-
         schemas = vim.list_extend(schemas, matches)
+        if #matches > 0 then
+          log.debug("schema matched: bufnr=%d client_id=%d adapter_name=%s #matches=%d", bufnr, client_id, ctx.adapter.name, #matches)
+        else
+          log.debug("no schema matches: bufnr=%d client_id=%d adapter_name=%s", bufnr, client_id, ctx.adapter.name)
+        end
       end
     end
 

@@ -86,11 +86,11 @@ function M:match_schema_from_lsp(bufnr)
     current_schemas = client.settings.json.schemas
   end
 
-  current_schemas = parse_schemas(schemas)
-
   schemas = vim.tbl_filter(function(schema)
-    return vim.list_contains(schemas, schema.uri)
+    return vim.list_contains(schemas, schema.url)
   end, current_schemas)
+
+  schemas = parse_schemas(schemas)
 
   log.debug("match schemas from lsp: adapter_name=%s client_id=%d #schemas=%d", self.name, client.id, #schemas)
 
