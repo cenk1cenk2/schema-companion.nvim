@@ -94,12 +94,8 @@ end
 function M.discover(bufnr, client)
   coroutine.resume(coroutine.create(function()
     xpcall(function()
-      if not M.read(bufnr, client.id) then
-        log.error("context doesn't exist: bufnr=%d client_id=%d", bufnr, client.id)
-
-        return
-      elseif not require("schema-companion.lsp").has_store_initialized(client.id) then
-        log.debug("context not yet initialized: bufnr=%d client_id=%d", bufnr, client.id)
+      if not require("schema-companion.lsp").has_store_initialized(client.id) then
+        log.debug("adapter not yet initialized: bufnr=%d client_id=%d", bufnr, client.id)
 
         return
       elseif M.had_discovered(bufnr, client.id) then
