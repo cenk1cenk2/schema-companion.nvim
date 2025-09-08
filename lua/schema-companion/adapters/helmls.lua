@@ -77,7 +77,7 @@ function M:get_schemas_from_lsp()
 
   local schemas = require("schema-companion.lsp").request_sync(client, "yaml/get/all/jsonSchemas") or {}
 
-  log.debug("get schemas from lsp: adapter_name=%s client_id=%d #schema=%d", self.name, client.id, #schemas)
+  log.debug("get schemas from lsp: adapter_name=%s client_id=%d #schemas=%d", self.name, client.id, #schemas)
 
   return schemas
 end
@@ -87,7 +87,7 @@ function M:match_schema_from_lsp(bufnr)
 
   local schemas = require("schema-companion.lsp").request_sync(client, "yaml/get/jsonSchema", { vim.uri_from_bufnr(bufnr) }, bufnr) or {}
 
-  log.debug("match schemas from lsp: adapter_name=%s client_id=%d #schema=%d", self.name, client.id, #schemas)
+  log.debug("match schemas from lsp: adapter_name=%s client_id=%d #schemas=%d", self.name, client.id, #schemas)
 
   return schemas
 end

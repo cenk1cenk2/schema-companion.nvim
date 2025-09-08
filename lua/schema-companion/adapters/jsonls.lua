@@ -68,7 +68,7 @@ function M:get_schemas_from_lsp()
   local schemas = vim.tbl_get(client, "settings", "json", "schemas")
   schemas = parse_schemas(schemas)
 
-  log.debug("get schemas from lsp: adapter_name=%s client_id=%d #schema=%d", self.name, client.id, #schemas)
+  log.debug("get schemas from lsp: adapter_name=%s client_id=%d #schemas=%d", self.name, client.id, #schemas)
 
   return schemas
 end
@@ -92,7 +92,7 @@ function M:match_schema_from_lsp(bufnr)
     return vim.list_contains(schemas, schema.uri)
   end, current_schemas)
 
-  log.debug("match schemas from lsp: adapter_name=%s client_id=%d #schema=%d", self.name, client.id, #schemas)
+  log.debug("match schemas from lsp: adapter_name=%s client_id=%d #schemas=%d", self.name, client.id, #schemas)
 
   return schemas
 end
