@@ -72,6 +72,26 @@ function M:on_update_schemas(bufnr, schemas)
   log.debug("notified client of configuration changes: file=%s adapter=%s client_id=%d schemas=%s", bufuri, M.name, client.id, override)
 end
 
+function M:get_schemas_from_lsp()
+  local client = self:get_client()
+
+  local schemas = require("schema-companion.lsp").request_sync(client, "yaml/get/all/jsonSchemas") or {}
+
+  log.debug("get schemas from lsp: adapter_name=%s client_id=%d #schema=%d", self.name, client.id, #schemas)
+
+  return schemas
+end
+
+function M:match_schema_from_lsp(bufnr)
+  local client = self:get_client()
+
+  local schemas = require("schema-companion.lsp").request_sync(client, "yaml/get/jsonSchema", { vim.uri_from_bufnr(bufnr) }, bufnr) or {}
+
+  log.debug("match schemas from lsp: adapter_name=%s client_id=%d #schema=%d", self.name, client.id, #schemas)
+
+  return schemas
+end
+
 M.setup = require("schema-companion.adapters.metatable").new(M)
 
 return M
