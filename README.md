@@ -55,6 +55,8 @@ You can automatically extend your configuration of the language server by wrappi
 
 Plugin has an adapter based system, where you can define different configurations per language server.
 
+**Please make sure to use the `./after/lsp` directory to load your language server configurations, because in some cases like this[issue](https://github.com/cenk1cenk2/schema-companion.nvim/issues/24), something else might overwrite it and the plugin will not function correctly.**`
+
 #### LSP Overlay Method
 
 ##### Yaml Language Server
