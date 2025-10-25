@@ -2,9 +2,8 @@
 
 **Forked from the original repository [someone-stole-my-name/yaml-companion.nvim](https://github.com/someone-stole-my-name/yaml-companion.nvim) and expanded for a bit more modularity.**
 
-## IMPORTANT NOTICE
-
-**This plugin has been rewritten to be more modular and extendable. All the setup and configuration of the repository has changed. You can use the `legacy` branch if you want to use the old version while migrating.**
+> [!IMPORTANT]
+> This plugin has been rewritten to be more modular and extendable. All the setup and configuration of the repository has changed. You can use the `legacy` branch if you want to use the old version while migrating.
 
 ## Features
 
@@ -21,13 +20,8 @@
 ```lua
 return {
   "cenk1cenk2/schema-companion.nvim",
-  dependencies = {
-    { "nvim-lua/plenary.nvim" },
-  },
-  config = function()
-    -- PLEASE FOLLOW THE CONFIGURATION INSTRUCTIONS BELOW SINCE THERE IS AN ADDITIONAL STEP NEEDED FOR EACH LANGUAGE SERVER
-    require("schema-companion").setup({})
-  end,
+  dependencies = { "nvim-lua/plenary.nvim" },
+  opts = {},
 }
 ```
 
@@ -37,7 +31,8 @@ Plugin has to be configured once, and the language servers can be added by exten
 
 **If you do not configure the language server with the `setup_client` function, the plugin will not work for the given language server.**
 
-**THIS PLUGIN IS A LITTLE BIT MORE INVOLVED THAN AVERAGE PLUGIN, PLEASE FOLLOW THE INSTRUCTIONS CAREFULLY.**
+> [!IMPORTANT]
+> THIS PLUGIN IS A LITTLE BIT MORE INVOLVED THAN AVERAGE PLUGIN, PLEASE FOLLOW THE INSTRUCTIONS CAREFULLY.
 
 ### Setup
 
@@ -53,11 +48,13 @@ require("schema-companion").setup({
 
 You can automatically extend your configuration of the language server by wrapping it with `schema-companion.setup_client` function.
 
-Plugin has an adapter based system, where you can define different configurations per language server.
-
-**Please make sure to use the `./after/lsp` directory to load your language server configurations, because in some cases like this [issue](https://github.com/cenk1cenk2/schema-companion.nvim/issues/24), something else might overwrite it and the plugin will not function correctly.**
+The plugin has an adapter based system, where you can define different configurations per language server.
 
 #### LSP Overlay Method
+
+> [!WARNING]
+> Please make sure to use the `./after/lsp` directory to load your language server configurations, because in some cases like this [issue](https://github.com/cenk1cenk2/schema-companion.nvim/issues/24), something else might overwrite it and the plugin will not function correctly.
+
 
 ##### Yaml Language Server
 
@@ -175,7 +172,7 @@ Available sources for the plugin is as follows.
 
 #### LSP
 
-To enable language server implicilitly using schemas provided by the language server you have to load the given source.
+To enable language server implicitly using schemas provided by the language server you have to load the given source.
 
 ```lua
 sources = {
