@@ -28,7 +28,7 @@ error("Can not source metafile.")
 ---@field ctx schema_companion.AdapterCtx
 ---@field name string
 ---@field config? table
----@field setup schema_companion.AdapterSetupFn
+---@field setup schema_companion.AdapterSetupFn @deprecated Use calling the adapter directly
 ---@field health? schema_companion.HealthFn
 ---@field client vim.lsp.Client
 ---@field set_client fun(self: schema_companion.Adapter, client: vim.lsp.Client): vim.lsp.Client
@@ -38,6 +38,7 @@ error("Can not source metafile.")
 ---@field on_setup_client schema_companion.AdapterOnSetupClientFn
 ---@field on_update_schemas schema_companion.AdapterOnUpdateSchemaFn
 ---@field get_sources schema_companion.AdapterGetSourcesFn
+---@field __call schema_companion.AdapterCallFn
 
 ---@class schema_companion.AdapterConfig
 ---@field sources? schema_companion.Source[] | fun(): schema_companion.Source[]
@@ -45,6 +46,7 @@ error("Can not source metafile.")
 ---@class schema_companion.AdapterCtx
 ---@field sources schema_companion.Source[]
 
+---@alias schema_companion.AdapterCallFn fun(self: schema_companion.Adapter, config?: vim.lsp.ClientConfig): vim.lsp.ClientConfig
 ---@alias schema_companion.AdapterSetupFn fun(config: schema_companion.AdapterConfig): schema_companion.Adapter
 ---@alias schema_companion.AdapterOnSetupClientFn fun(self: schema_companion.Adapter, config: vim.lsp.ClientConfig): vim.lsp.ClientConfig
 ---@alias schema_companion.AdapterOnUpdateSchemaFn fun(self: schema_companion.Adapter, bufnr: number, schemas: schema_companion.Schema[]): nil

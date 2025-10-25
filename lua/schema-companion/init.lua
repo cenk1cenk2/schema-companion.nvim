@@ -23,8 +23,9 @@ end
 ---@param config? vim.lsp.ClientConfig --- User configuration for the language server.
 ---@returns vim.lsp.ClientConfig
 function M.setup_client(adapter, config)
+  require("schema-companion.log").warn("schema-companion.setup_client is deprecated; call the adapter directly: adapter_name=%s", adapter.name)
+  require("schema-companion.deprecated").setup_client = true
   config = config or {}
-
   return adapter:on_setup_client(config)
 end
 

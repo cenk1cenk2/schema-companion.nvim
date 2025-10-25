@@ -33,26 +33,42 @@ local adapter = {
   end,
 }
 
+local function initialize_sources(self, config)
+  config = config or {}
+  self.ctx = self.ctx or {}
+  self.ctx.sources = utils.evaluate_property(config.sources) or {
+    require("schema-companion.sources").lsp.setup(),
+  }
+  log.debug(
+    "adapter sources loaded: adapter_name=%s sources=%s",
+    self.name,
+    vim.tbl_map(function(source)
+      return source.name
+    end, self.ctx.sources)
+  )
+end
+
 return {
   new = function(self)
-    self = setmetatable(self, {})
+    self = setmetatable(self, {
+      __call = function(_, config)
+        initialize_sources(self, config)
+        if config then
+          config.sources = nil
+        end
+        return self:on_setup_client(config or {})
+      end,
+    })
     self = vim.tbl_extend("keep", self, adapter)
 
-    return function(config)
-      self.ctx = {}
-
-      self.ctx.sources = utils.evaluate_property(config.sources) or {
-        require("schema-companion.sources").lsp.setup(),
-      }
-      log.debug(
-        "adapter sources loaded: adapter_name=%s sources=%s",
-        self.name,
-        vim.tbl_map(function(source)
-          return source.name
-        end, self.ctx.sources)
-      )
-
+    -- legacy setup function for backward compatibility
+    self.setup = function(config)
+      log.warn("schema-companion adapter.setup is deprecated; call adapter directly instead: adapter_name=%s", self.name)
+      require("schema-companion.deprecated").adapter_setup = true
+      initialize_sources(self, config)
       return self
     end
+
+    return self
   end,
 }

@@ -92,6 +92,6 @@ function M:match_schema_from_lsp(bufnr)
   return schemas
 end
 
-M.setup = require("schema-companion.adapters.metatable").new(M)
+M = require("schema-companion.adapters.metatable").new(M)
 
 return M

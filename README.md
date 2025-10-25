@@ -29,7 +29,11 @@ return {
 
 Plugin has to be configured once, and the language servers can be added by extending the LSP configuration.
 
-**If you do not configure the language server with the `setup_client` function, the plugin will not work for the given language server.**
+**If you do not configure the language server with the adapter, the plugin will not work for the given language server.**
+
+> [!WARNING]
+> Legacy `schema-companion.setup_client()` and `adapter.setup()` are deprecated and will emit warnings.
+> Call adapters directly; they are now callable and return the finalized LSP configuration. 
 
 > [!IMPORTANT]
 > THIS PLUGIN IS A LITTLE BIT MORE INVOLVED THAN AVERAGE PLUGIN, PLEASE FOLLOW THE INSTRUCTIONS CAREFULLY.
@@ -46,8 +50,6 @@ require("schema-companion").setup({
 
 ### Language Server Configuration
 
-You can automatically extend your configuration of the language server by wrapping it with `schema-companion.setup_client` function.
-
 The plugin has an adapter based system, where you can define different configurations per language server.
 
 #### LSP Overlay Method
@@ -55,80 +57,128 @@ The plugin has an adapter based system, where you can define different configura
 > [!WARNING]
 > Please make sure to use the `./after/lsp` directory to load your language server configurations, because in some cases like this [issue](https://github.com/cenk1cenk2/schema-companion.nvim/issues/24), something else might overwrite it and the plugin will not function correctly.
 
-
 ##### Yaml Language Server
 
 ```lua
--- your LSP file: ./after/lsp/yamlls.lua
-return require("schema-companion").setup_client(
-  require("schema-companion").adapters.yamlls.setup({
-    sources = {
-      -- your sources for the language server
-      require("schema-companion").sources.matchers.kubernetes.setup({ version = "master" }),
-      require("schema-companion").sources.lsp.setup(),
-      require("schema-companion").sources.schemas.setup({
-        {
-          name = "Kubernetes master",
-          uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/all.json",
-        },
-      }),
-    },
-  }),
-  {
-    --- your yaml language server configuration
-  }
-)
+-- ./after/lsp/yamlls.lua
+local sc = require("schema-companion")
+return sc.adapters.yamlls({
+  sources = {
+    sc.sources.matchers.kubernetes.setup({ version = "master" }),
+    sc.sources.lsp.setup(),
+    sc.sources.schemas.setup({
+      {
+        name = "Kubernetes master",
+        uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/all.json",
+      },
+    }),
+  },
+  --- your language server configuration (settings, init_options, capabilities...)
+  settings = {},
+})
 ```
 
 ##### Helm Language Server
 
 ```lua
--- your LSP file: ./after/lsp/helm_ls.lua
-return require("schema-companion").setup_client(
-  require("schema-companion").adapters.helmls.setup({
-    sources = {
-      -- your sources for the language server
-      require("schema-companion").sources.matchers.kubernetes.setup({ version = "master" }),
-    },
-  }),
-  {
-    --- your language server configuration
-  }
-)
+-- ./after/lsp/helm_ls.lua
+local sc = require("schema-companion")
+return sc.adapters.helmls({
+  sources = {
+    sc.sources.matchers.kubernetes.setup({ version = "master" }),
+  },
+  --- your language server configuration (settings, init_options, capabilities...)
+  settings = {},
+})
 ```
 
 ##### Json Language Server
 
 ```lua
--- your LSP file: ./after/lsp/jsonls.lua
-return require("schema-companion").setup_client(
-  require("schema-companion").adapters.jsonls.setup({
-    sources = {
-      require("schema-companion").sources.lsp.setup(),
-      require("schema-companion").sources.none.setup(),
-    },
-  }),
-  {
-    --- your language server configuration
-  }
-)
+-- ./after/lsp/jsonls.lua
+local sc = require("schema-companion")
+return sc.adapters.jsonls({
+  sources = {
+    sc.sources.lsp.setup(),
+    sc.sources.none.setup(),
+  },
+  --- your language server configuration (settings, init_options, capabilities...)
+  settings = {},
+})
 ```
 
 ##### Taplo
 
 ```lua
--- your LSP file: ./after/lsp/taplo.lua
-return require("schema-companion").setup_client(
-  require("schema-companion").adapters.taplo.setup({
-    sources = {
-      require("schema-companion").sources.lsp.setup(),
-      require("schema-companion").sources.none.setup(),
-    },
-  }),
-  {
-    --- your language server configuration
-  }
-)
+-- ./after/lsp/taplo.lua
+local sc = require("schema-companion")
+return sc.adapters.taplo({
+  sources = {
+    sc.sources.lsp.setup(),
+    sc.sources.none.setup(),
+  },
+  --- your language server configuration (settings, init_options, capabilities...)
+  settings = {},
+})
+```
+
+#### `vim.lsp.config()` Method
+
+##### Yaml Language Server
+
+```lua
+local sc = require("schema-companion")
+vim.lsp.comfig("yamlls", sc.adapters.yamlls({
+  sources = {
+    sc.sources.matchers.kubernetes.setup({ version = "master" }),
+    sc.sources.lsp.setup(),
+    sc.sources.schemas.setup({
+      {
+        name = "Kubernetes master",
+        uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/all.json",
+      },
+    }),
+  },
+  --- your language server configuration (settings, init_options, capabilities...)
+}))
+```
+
+##### Helm Language Server
+
+```lua
+local sc = require("schema-companion")
+vim.lsp.config("helm_ls", sc.adapters.helmls({
+  sources = {
+    sc.sources.matchers.kubernetes.setup({ version = "master" }),
+  },
+  --- your language server configuration (settings, init_options, capabilities...)
+}))
+```
+
+##### Json Language Server
+
+```lua
+local sc = require("schema-companion")
+vim.lsp.config("jsonls", sc.adapters.jsonls({
+  sources = {
+    sc.sources.lsp.setup(),
+    sc.sources.none.setup(),
+  },
+  --- your language server configuration (settings, init_options, capabilities...)
+}))
+```
+
+##### Taplo
+
+```lua
+local sc = require("schema-companion")
+vim.lsp.config("taplo", sc.adapters.taplo({
+  sources = {
+    sc.sources.lsp.setup(),
+    sc.sources.none.setup(),
+  },
+  --- your language server configuration (settings, init_options, capabilities...)
+}))
 ```
 
 #### LSP Config Method (deprecated)
@@ -136,7 +186,7 @@ return require("schema-companion").setup_client(
 You can also use the `lspconfig` method to setup the language server, where the same methodology applies.
 
 ```lua
-require("lspconfig").yamlls.setup(require("schema-companion").setup_client(adapter, {
+require("lspconfig").yamlls.setup(require("schema-companion").adapters.yamlls({
   -- your yaml language server configuration
 }))
 ```
@@ -155,12 +205,40 @@ Adapter is responsible for following.
 
 Available adapters for the plugin is as follows.
 
-- `require("schema-companion").adapters.yamlls.setup()`
-- `require("schema-companion").adapters.helmls.setup()`
-- `require("schema-companion").adapters.jsonls.setup()`
-- `require("schema-companion").adapters.taplo.setup()`
+- `require("schema-companion").adapters.yamlls()`
+- `require("schema-companion").adapters.helmls()`
+- `require("schema-companion").adapters.jsonls()`
+- `require("schema-companion").adapters.taplo()`
 
-**WITH THE CURRENT MODULAR ARCHITECTURE REALLY REALLY WILL APPRECIATE ANY CONTRIBITIONS.**
+### Migration
+
+Old:
+```lua
+return require("schema-companion").setup_client(
+  require("schema-companion").adapters.yamlls.setup({
+    sources = {...}
+  }),
+  {
+    settings = {...}, 
+    init_options = {...},
+    ...
+  }
+)
+```
+New:
+```lua
+local sc = require("schema-companion")
+return sc.adapters.yamlls({
+  sources = { ... },
+  settings = { ... },
+  init_options = { ... },
+  ...
+})
+```
+Health check warns only if old API used.
+
+> [!NOTE]
+> WITH THE CURRENT MODULAR ARCHITECTURE REALLY REALLY WILL APPRECIATE ANY CONTRIBITIONS.
 
 ### Sources
 
