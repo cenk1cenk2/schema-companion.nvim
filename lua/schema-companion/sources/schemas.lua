@@ -1,6 +1,8 @@
 ---@class schema_companion.Source
 local M = {}
 
+local wrap = require("schema-companion.sources.metatable")
+
 M.name = "Schemas"
 
 M.config = {}
@@ -19,18 +21,14 @@ local function enrich_schemas(schemas)
   return schemas
 end
 
----
----@param schemas schema_companion.Schema[]
----@return schema_companion.Source
-function M.setup(schemas)
-  setmetatable(M, {})
-  M.config = enrich_schemas(schemas)
-
-  return M
+local function apply(self, schemas)
+  if schemas then
+    self.config = enrich_schemas(schemas)
+  end
 end
 
 function M:get_schemas()
   return self.config
 end
 
-return M
+return wrap(M, apply)

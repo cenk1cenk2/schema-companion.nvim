@@ -17,6 +17,12 @@ function M.check()
   else
     vim.health.ok("Using new direct adapter call API")
   end
+
+  if deprecated.source_setup then
+    vim.health.warn("Deprecated API used: source.setup(). Migrate to direct source call: require('schema-companion').source.none()")
+  else
+    vim.health.ok("Using new direct source call API")
+  end
 end
 
 return M

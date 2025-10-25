@@ -32,8 +32,8 @@ Plugin has to be configured once, and the language servers can be added by exten
 **If you do not configure the language server with the adapter, the plugin will not work for the given language server.**
 
 > [!WARNING]
-> Legacy `schema-companion.setup_client()` and `adapter.setup()` are deprecated and will emit warnings.
-> Call adapters directly; they are now callable and return the finalized LSP configuration. 
+> Legacy `schema-companion.setup_client()`, `adapter.setup()` and `source.setup()` are deprecated and will emit warnings.
+> Call adapters and sources directly; they are now callable and return the finalized LSP or source configuration. 
 
 > [!IMPORTANT]
 > THIS PLUGIN IS A LITTLE BIT MORE INVOLVED THAN AVERAGE PLUGIN, PLEASE FOLLOW THE INSTRUCTIONS CAREFULLY.
@@ -64,9 +64,9 @@ The plugin has an adapter based system, where you can define different configura
 local sc = require("schema-companion")
 return sc.adapters.yamlls({
   sources = {
-    sc.sources.matchers.kubernetes.setup({ version = "master" }),
-    sc.sources.lsp.setup(),
-    sc.sources.schemas.setup({
+    sc.sources.matchers.kubernetes({ version = "master" }),
+    sc.sources.lsp(),
+    sc.sources.schemas({
       {
         name = "Kubernetes master",
         uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/all.json",
@@ -85,7 +85,7 @@ return sc.adapters.yamlls({
 local sc = require("schema-companion")
 return sc.adapters.helmls({
   sources = {
-    sc.sources.matchers.kubernetes.setup({ version = "master" }),
+    sc.sources.matchers.kubernetes({ version = "master" }),
   },
   --- your language server configuration (settings, init_options, capabilities...)
   settings = {},
@@ -99,8 +99,8 @@ return sc.adapters.helmls({
 local sc = require("schema-companion")
 return sc.adapters.jsonls({
   sources = {
-    sc.sources.lsp.setup(),
-    sc.sources.none.setup(),
+    sc.sources.lsp(),
+    sc.sources.none(),
   },
   --- your language server configuration (settings, init_options, capabilities...)
   settings = {},
@@ -114,8 +114,8 @@ return sc.adapters.jsonls({
 local sc = require("schema-companion")
 return sc.adapters.taplo({
   sources = {
-    sc.sources.lsp.setup(),
-    sc.sources.none.setup(),
+    sc.sources.lsp(),
+    sc.sources.none(),
   },
   --- your language server configuration (settings, init_options, capabilities...)
   settings = {},
@@ -130,9 +130,9 @@ return sc.adapters.taplo({
 local sc = require("schema-companion")
 vim.lsp.comfig("yamlls", sc.adapters.yamlls({
   sources = {
-    sc.sources.matchers.kubernetes.setup({ version = "master" }),
-    sc.sources.lsp.setup(),
-    sc.sources.schemas.setup({
+    sc.sources.matchers.kubernetes({ version = "master" }),
+    sc.sources.lsp(),
+    sc.sources.schemas({
       {
         name = "Kubernetes master",
         uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-strict/all.json",
@@ -149,7 +149,7 @@ vim.lsp.comfig("yamlls", sc.adapters.yamlls({
 local sc = require("schema-companion")
 vim.lsp.config("helm_ls", sc.adapters.helmls({
   sources = {
-    sc.sources.matchers.kubernetes.setup({ version = "master" }),
+    sc.sources.matchers.kubernetes({ version = "master" }),
   },
   --- your language server configuration (settings, init_options, capabilities...)
 }))
@@ -161,8 +161,8 @@ vim.lsp.config("helm_ls", sc.adapters.helmls({
 local sc = require("schema-companion")
 vim.lsp.config("jsonls", sc.adapters.jsonls({
   sources = {
-    sc.sources.lsp.setup(),
-    sc.sources.none.setup(),
+    sc.sources.lsp(),
+    sc.sources.none(),
   },
   --- your language server configuration (settings, init_options, capabilities...)
 }))
@@ -174,8 +174,8 @@ vim.lsp.config("jsonls", sc.adapters.jsonls({
 local sc = require("schema-companion")
 vim.lsp.config("taplo", sc.adapters.taplo({
   sources = {
-    sc.sources.lsp.setup(),
-    sc.sources.none.setup(),
+    sc.sources.lsp(),
+    sc.sources.none(),
   },
   --- your language server configuration (settings, init_options, capabilities...)
 }))
@@ -255,7 +255,7 @@ To enable language server implicitly using schemas provided by the language serv
 ```lua
 sources = {
   -- your sources for the language server
-  require("schema-companion").sources.lsp.setup()
+  require("schema-companion").sources.lsp()
 },
 ```
 
@@ -266,7 +266,7 @@ You can provide static set of schemas where you do want to only manual selection
 ```lua
 sources = {
   -- your sources for the language server
-  require("schema-companion").sources.schemas.setup({
+  require("schema-companion").sources.schemas({
     {
       name = "Kubernetes v1.29",
       uri = "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.29.7-standalone-strict/all.json",
@@ -290,7 +290,7 @@ Available matchers for the plugin is as follows.
 ```lua
 sources = {
   -- your sources for the language server
-  require("schema-companion").sources.matchers.kubernetes.setup({
+  require("schema-companion").sources.matchers.kubernetes({
     version = "master"
   })
 },
@@ -303,7 +303,7 @@ None source provides a way to reset the current schema to `none`.
 ```lua
 sources = {
   -- your sources for the language server
-  require("schema-companion").sources.none.setup()
+  require("schema-companion").sources.none()
 },
 ```
 

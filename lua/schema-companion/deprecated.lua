@@ -3,6 +3,7 @@
 local M = {
   adapter_setup = false,
   setup_client = false,
+  source_setup = false,
 }
 
 return M

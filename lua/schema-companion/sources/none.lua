@@ -1,6 +1,8 @@
 ---@class schema_companion.Source
 local M = {}
 
+local wrap = require("schema-companion.sources.metatable")
+
 M.name = "None"
 
 M.config = {}
@@ -15,16 +17,11 @@ local function enrich_schemas(schemas)
       schema.source = M.name
     end
   end
-
   return schemas
-end
-
-function M.setup()
-  return M
 end
 
 function M:get_schemas()
   return enrich_schemas(require("schema-companion.schema").get_default_schemas())
 end
 
-return M
+return wrap(M)

@@ -15,14 +15,16 @@ error("Can not source metafile.")
 ---@class schema_companion.Source: table
 ---@field name string
 ---@field config? table
----@field setup schema_companion.SourceSetupFn
+---@field setup schema_companion.SourceSetupFn @deprecated Use calling the source directly
 ---@field health? schema_companion.HealthFn
 ---@field match? schema_companion.SourceMatchFn
 ---@field get_schemas? schema_companion.SourceGetSchemasFn
+---@field __call schema_companion.SourceCallFn
 
 ---@alias schema_companion.SourceSetupFn fun(table?): schema_companion.Source
 ---@alias schema_companion.SourceMatchFn fun(self: schema_companion.Source, ctx: schema_companion.Context, bufnr?: number): schema_companion.Schema[]
 ---@alias schema_companion.SourceGetSchemasFn fun(self: schema_companion.Source, ctx: schema_companion.Context, bufnr?: number): schema_companion.Schema[]
+---@alias schema_companion.SourceCallFn fun(self: schema_companion.Source, config?: table): schema_companion.Source
 
 ---@class schema_companion.Adapter: table
 ---@field ctx schema_companion.AdapterCtx

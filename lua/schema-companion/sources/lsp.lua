@@ -1,13 +1,10 @@
 ---@class schema_companion.Source
 local M = {}
 
+local wrap = require("schema-companion.sources.metatable")
 local log = require("schema-companion.log")
 
 M.name = "LSP"
-
-function M.setup()
-  return M
-end
 
 ---@param ctx schema_companion.Context
 ---@param schemas schema_companion.Schema[]
@@ -37,4 +34,4 @@ function M:match(ctx, bufnr)
   return enrich_schemas(ctx, matches)
 end
 
-return M
+return wrap(M)

@@ -37,7 +37,7 @@ local function initialize_sources(self, config)
   config = config or {}
   self.ctx = self.ctx or {}
   self.ctx.sources = utils.evaluate_property(config.sources) or {
-    require("schema-companion.sources").lsp.setup(),
+    require("schema-companion.sources").lsp(),
   }
   log.debug(
     "adapter sources loaded: adapter_name=%s sources=%s",

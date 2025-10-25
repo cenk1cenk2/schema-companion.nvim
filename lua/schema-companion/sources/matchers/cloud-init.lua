@@ -1,18 +1,16 @@
----@class schema_companion.Matcher
+---@class schema_companion.Source
 local M = {}
+
+local wrap = require("schema-companion.sources.metatable")
 
 M.name = "Cloud-Init"
 
 M.config = {}
 
----
----@param config table
----@return schema_companion.Matcher
-function M.setup(config)
-  setmetatable(M, {})
-  M.config = vim.tbl_deep_extend("force", {}, M.config, config)
-
-  return M
+local function apply(self, config)
+  if config then
+    self.config = vim.tbl_deep_extend("force", {}, self.config, config)
+  end
 end
 
 function M:match(_, bufnr)
@@ -27,4 +25,4 @@ function M:match(_, bufnr)
   end
 end
 
-return M
+return wrap(M, apply)

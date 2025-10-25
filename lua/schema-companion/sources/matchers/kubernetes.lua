@@ -1,6 +1,7 @@
 ---@class schema_companion.Source
 local M = {}
 
+local wrap = require("schema-companion.sources.metatable")
 local log = require("schema-companion.log")
 local utils = require("schema-companion.utils")
 
@@ -10,14 +11,10 @@ M.config = {
   version = "master",
 }
 
----
----@param config { version: string }
----@return schema_companion.Source
-function M.setup(config)
-  setmetatable(M, {})
-  M.config = vim.tbl_deep_extend("force", {}, M.config, config)
-
-  return M
+local function apply(self, config)
+  if config then
+    self.config = vim.tbl_deep_extend("force", {}, self.config, config)
+  end
 end
 
 function M.set_version(version)
@@ -157,4 +154,4 @@ function M:match(_, bufnr)
   return schemas
 end
 
-return M
+return wrap(M, apply)
