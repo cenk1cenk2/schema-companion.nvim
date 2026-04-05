@@ -39,9 +39,7 @@ function M.on_store_initialized(client_id, adapter)
 
   require("schema-companion.adapters").write(client_id, adapter)
 
-  local buffers = vim.lsp.get_buffers_by_client_id(client_id)
-
-  for _, bufnr in ipairs(buffers) do
+  for bufnr in pairs(client.attached_buffers) do
     log.debug("running autodiscover: client_id=%s bufnr=%d", client_id, bufnr)
 
     require("schema-companion.context").discover(bufnr, client)
