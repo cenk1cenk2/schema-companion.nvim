@@ -55,7 +55,6 @@ The plugin has an adapter based system, where you can define different configura
 > [!WARNING]
 > Please make sure to use the `./after/lsp` directory to load your language server configurations, because in some cases like this [issue](https://github.com/cenk1cenk2/schema-companion.nvim/issues/24), something else might overwrite it and the plugin will not function correctly.
 
-
 ##### Yaml Language Server
 
 ```lua
@@ -265,7 +264,7 @@ require("lualine").setup({
           return ("%s %s"):format(nvim.ui.icons.ui.Table, require("schema-companion").get_current_schemas() or "none"):sub(0, 128)
         end,
         cond = function()
-          return package.loaded["schema-companion"]
+          return package.loaded["schema-companion"] and require("schema-companion").get_current_schemas() ~= nil
         end,
       },
     },
