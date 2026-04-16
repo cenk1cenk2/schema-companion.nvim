@@ -130,6 +130,26 @@ return require("schema-companion").setup_client(
 )
 ```
 
+##### Tombi
+
+> [!NOTE]
+> Requires Tombi v0.7.19+ for the `tombi/listSchemas`, `tombi/getStatus`, and `tombi/associateSchema` custom LSP commands.
+
+```lua
+-- your LSP file: ./after/lsp/tombi.lua
+return require("schema-companion").setup_client(
+  require("schema-companion").adapters.tombi.setup({
+    sources = {
+      require("schema-companion").sources.lsp.setup(),
+      require("schema-companion").sources.none.setup(),
+    },
+  }),
+  {
+    --- your language server configuration
+  }
+)
+```
+
 #### LSP Config Method (deprecated)
 
 You can also use the `lspconfig` method to setup the language server, where the same methodology applies.
@@ -158,6 +178,7 @@ Available adapters for the plugin is as follows.
 - `require("schema-companion").adapters.helmls.setup()`
 - `require("schema-companion").adapters.jsonls.setup()`
 - `require("schema-companion").adapters.taplo.setup()`
+- `require("schema-companion").adapters.tombi.setup()`
 
 **WITH THE CURRENT MODULAR ARCHITECTURE REALLY REALLY WILL APPRECIATE ANY CONTRIBITIONS.**
 
