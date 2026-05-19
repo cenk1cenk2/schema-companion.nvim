@@ -21,7 +21,7 @@ function M.setup(config)
 end
 
 local match_resource = function(bufnr, resource)
-  if not resource.kind or not resource.group or not resource.version then
+  if not resource.group or not resource.version or not resource.kind then
     return nil
   end
 
@@ -67,7 +67,7 @@ function M:match(_, bufnr)
       current.kind = kind
     end
 
-    if current.group and current.kind then
+    if current.group and current.group:find("backstage.io") and current.kind then
       table.insert(resources, current)
       current = {}
     end
